@@ -88,7 +88,7 @@ export default function FormAnalytics() {
         {activeTab === 'analytics' && <AnalyticsDashboard formId={formId} />}
 
         {activeTab === 'responses' && (
-          <ResponsesList formId={formId} />
+          <ResponsesList formId={formId} form={form} />
         )}
       </div>
     </AppLayout>
@@ -96,7 +96,7 @@ export default function FormAnalytics() {
 }
 
 // Responses list component with pagination and search
-function ResponsesList({ formId }) {
+function ResponsesList({ formId, form }) {
   const [responses, setResponses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -161,16 +161,20 @@ function ResponsesList({ formId }) {
                 </span>
               </div>
               <div className="divide-y divide-slate-100">
-                {response.answers.map((answer, idx) => (
-                  <div key={idx} className="py-2 text-sm flex flex-col">
-                    <span className="font-semibold text-slate-700">
-                      {answer.fieldId}
-                    </span>
-                    <span className="text-slate-600 mt-0.5">
-                      {Array.isArray(answer.value) ? answer.value.join(', ') : String(answer.value)}
-                    </span>
-                  </div>
-                ))}
+                {response.answers.map((answer, idx) => {
+                  const field = form?.fields?.find(f => f._id === answer.fieldId);
+                  const label = field ? field.label : answer.fieldId;
+                  const value =
+                    answer.value === null || answer.value === ''
+                      ? <span className="text-slate-400">No response</span>
+                      : (Array.isArray(answer.value) ? answer.value.join(', ') : String(answer.value));
+                  return (
+                    <div key={idx} className="py-2 text-sm flex flex-col">
+                      <span className="font-semibold text-slate-700">{label}</span>
+                      <span className="text-slate-600 mt-0.5">{value}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))
