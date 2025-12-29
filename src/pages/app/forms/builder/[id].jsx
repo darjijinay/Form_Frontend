@@ -6,6 +6,39 @@ import PreviewPanel from '../../../../components/builder/PreviewPanel';
 import GoogleSheetsIntegration from '../../../../components/forms/GoogleSheetsIntegration';
 import Step1FormDetails from '../../../../components/builder/Step1FormDetails';
 import { useEffect, useState, useRef } from 'react';
+import QRCode from 'qrcode';
+
+// SSR-safe QR code image component
+function QrImage({ publicUrl }) {
+  const [qr, setQr] = useState('');
+  useEffect(() => {
+    if (!publicUrl) return;
+    QRCode.toDataURL(publicUrl, { width: 128, margin: 2 }, (err, url) => {
+      if (!err) setQr(url);
+    });
+  }, [publicUrl]);
+
+  const handleDownload = () => {
+    if (!qr) return;
+    const a = document.createElement('a');
+    a.href = qr;
+    a.download = 'form-qr.png';
+    a.click();
+  };
+
+  return (
+    <div className="flex flex-col items-center">
+      {qr && <img src={qr} alt="QR Code" width={96} height={96} style={{ background: '#fff', padding: 4, borderRadius: 8 }} />}
+      <button
+        className="mt-2 px-2 py-1 rounded bg-emerald-600 text-white text-xs"
+        onClick={handleDownload}
+      >
+        Download QR
+      </button>
+      <div className="text-xs text-slate-400 mt-1">Share QR</div>
+    </div>
+  );
+}
 import { formApi } from '../../../../api/formApi';
 import { useAuthStore } from '../../../../store/authStore';
 
@@ -349,14 +382,19 @@ export default function FormBuilderPage() {
                   <div className="text-sm text-slate-600">Share link</div>
                   <div className="text-xs text-slate-400">Copy to clipboard</div>
                 </div>
-                <div className="mt-2 flex gap-2">
-                  <input readOnly value={form._id ? `${typeof window !== 'undefined' ? window.location.origin : ''}/public/${form._id}` : ''} className="flex-1 px-3 py-2 border rounded" />
-                  <button onClick={() => {
-                    const url = form._id ? `${typeof window !== 'undefined' ? window.location.origin : ''}/public/${form._id}` : '';
-                    if (!url) return;
-                    navigator.clipboard?.writeText(url).then(()=> alert('Link copied'));
-                  }} className="px-3 py-2 rounded bg-indigo-600 text-white">Copy</button>
+                <div className="mt-2 flex flex-col md:flex-row gap-4 items-start md:items-center">
+                  <div className="flex-1 flex gap-2 w-full">
+                    <input readOnly value={form._id ? `${typeof window !== 'undefined' ? window.location.origin : ''}/public/${form._id}` : ''} className="flex-1 px-3 py-2 border rounded" />
+                    <button onClick={() => {
+                      const url = form._id ? `${typeof window !== 'undefined' ? window.location.origin : ''}/public/${form._id}` : '';
+                      if (!url) return;
+                      navigator.clipboard?.writeText(url).then(()=> alert('Link copied'));
+                    }} className="px-3 py-2 rounded bg-indigo-600 text-white">Copy</button>
+                  </div>
+                  {/* QR Code Section (SSR-safe) */}
+                  {form._id && <QrImage publicUrl={`${typeof window !== 'undefined' ? window.location.origin : ''}/public/${form._id}`} />}
                 </div>
+
                 <div className="mt-2 text-xs text-slate-500">Public URL: <code className="break-all">{form._id ? `${typeof window !== 'undefined' ? window.location.origin : ''}/public/${form._id}` : '-'}</code></div>
               </div>
 
