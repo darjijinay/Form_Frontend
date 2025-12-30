@@ -54,38 +54,56 @@ export default function PublicFormPage(){
       return null;
     };
 
-    const infoCards = [];
-    const dateDetail = form.date ? { value: form.date, label: 'Date' } : findCustomDetail((label) => /date/i.test(label));
-    if (dateDetail) infoCards.push({ label: dateDetail.label || 'Date', value: dateDetail.value, icon: '📅' });
-
-    // Find start/end times by user-provided labels; fall back to generic time
-    const startDetail = form.startTime ? { value: form.startTime, label: 'Start Time' } : findCustomDetail((label) => /start time|start|begin/i.test(label));
-    const endDetail = form.endTime ? { value: form.endTime, label: 'End Time' } : findCustomDetail((label) => /end time|end|finish|closing/i.test(label));
-    if (!startDetail && !endDetail) {
-      const timeDetail = form.time ? { value: form.time, label: 'Time' } : findCustomDetail((label) => /\btime\b/i.test(label));
-      if (timeDetail) infoCards.push({ label: timeDetail.label || 'Time', value: timeDetail.value, icon: '⏰' });
-    } else {
-      if (startDetail) infoCards.push({ label: startDetail.label || 'Start Time', value: startDetail.value, icon: '⏰' });
-      if (endDetail) infoCards.push({ label: endDetail.label || 'End Time', value: endDetail.value, icon: '⏰' });
+    const initialInfoCards = [];
+    const getLabel = (fieldKey, defaultLabel) => {
+      return form.step1Labels?.[fieldKey] || defaultLabel;
     }
 
-    const locationDetail = form.location ? { value: form.location, label: 'Location / Mode' } : findCustomDetail((label) => /location|place|venue|mode/i.test(label));
-    if (locationDetail) infoCards.push({ label: locationDetail.label || 'Location / Mode', value: locationDetail.value, icon: '📍' });
+    const dateDetail = form.date ? { value: form.date, label: getLabel('date', 'Date') } : findCustomDetail((label) => /date/i.test(label));
+    if (dateDetail) initialInfoCards.push({ label: dateDetail.label, value: dateDetail.value, icon: '📅' });
+
+    // Find start/end times by user-provided labels; fall back to generic time
+    const startDetail = form.startTime ? { value: form.startTime, label: getLabel('startTime', 'Start Time') } : findCustomDetail((label) => /start time|start|begin/i.test(label));
+    const endDetail = form.endTime ? { value: form.endTime, label: getLabel('endTime', 'End Time') } : findCustomDetail((label) => /end time|end|finish|closing/i.test(label));
+    if (!startDetail && !endDetail) {
+      const timeDetail = form.time ? { value: form.time, label: getLabel('time', 'Time') } : findCustomDetail((label) => /\btime\b/i.test(label));
+      if (timeDetail) initialInfoCards.push({ label: timeDetail.label, value: timeDetail.value, icon: '⏰' });
+    } else {
+      if (startDetail) initialInfoCards.push({ label: startDetail.label, value: startDetail.value, icon: '⏰' });
+      if (endDetail) initialInfoCards.push({ label: endDetail.label, value: endDetail.value, icon: '⏰' });
+    }
+
+    const locationDetail = form.location ? { value: form.location, label: getLabel('location', 'Location / Mode') } : findCustomDetail((label) => /location|place|venue|mode/i.test(label));
+    if (locationDetail) initialInfoCards.push({ label: locationDetail.label, value: locationDetail.value, icon: '📍' });
+
+    const salaryDetail = form.salary ? { value: form.salary, label: getLabel('salary', 'Salary') } : findCustomDetail((label) => /salary|pay/i.test(label));
+    if (salaryDetail) initialInfoCards.push({ label: salaryDetail.label, value: salaryDetail.value, icon: '💰' });
+
+    const employmentTypeDetail = form.employmentType ? { value: form.employmentType, label: getLabel('employmentType', 'Employment Type') } : findCustomDetail((label) => /employment type|job type|employment/i.test(label));
+    if (employmentTypeDetail) initialInfoCards.push({ label: employmentTypeDetail.label, value: employmentTypeDetail.value, icon: '📄' });
+
+    const skillsDetail = form.skills ? { value: form.skills, label: getLabel('skills', 'Skills') } : findCustomDetail((label) => /skill/i.test(label));
+    if (skillsDetail) initialInfoCards.push({ label: skillsDetail.label, value: skillsDetail.value, icon: '✨' });
+
+    const deadlineDetail = form.deadline ? { value: form.deadline, label: getLabel('deadline', 'Application Deadline') } : findCustomDetail((label) => /deadline/i.test(label));
+    if (deadlineDetail) initialInfoCards.push({ label: deadlineDetail.label, value: deadlineDetail.value, icon: '⏳' });
 
     // Match organizer name/email/phone with more specific rules so we don't pick an email for the name
-    const organizerNameDetail = form.organizerName ? { value: form.organizerName, label: 'Organizer' } : findCustomDetail((label) => {
+    const organizerNameDetail = form.organizerName ? { value: form.organizerName, label: getLabel('organizerName', 'Organizer') } : findCustomDetail((label) => {
       const l = String(label).toLowerCase();
       if (/organizer name|organiser name|organizername|organisername/.test(l)) return true;
       if (/\borganizer\b|\borganiser\b|\bhost\b|\bby\b/.test(l) && !/email|phone|mobile|contact/.test(l)) return true;
       return false;
     });
-    if (organizerNameDetail) infoCards.push({ label: organizerNameDetail.label || 'Organizer', value: organizerNameDetail.value, icon: '👤' });
+    if (organizerNameDetail) initialInfoCards.push({ label: organizerNameDetail.label, value: organizerNameDetail.value, icon: '👤' });
 
-    const organizerEmailDetail = form.organizerEmail ? { value: form.organizerEmail, label: 'Organizer Email' } : findCustomDetail((label) => /organizer email|organizeremail|contact email|email|e-mail/i.test(String(label).toLowerCase()));
-    if (organizerEmailDetail) infoCards.push({ label: organizerEmailDetail.label || 'Organizer Email', value: organizerEmailDetail.value, icon: '✉️' });
+    const organizerEmailLabel = form.sourceTemplate === 'tpl2' ? getLabel('organizerEmail', 'E-mail') : getLabel('organizerEmail', 'Organizer Email');
+    const organizerEmailDetail = form.organizerEmail ? { value: form.organizerEmail, label: organizerEmailLabel } : findCustomDetail((label) => /organizer email|organizeremail|contact email|email|e-mail/i.test(String(label).toLowerCase()));
+    if (organizerEmailDetail) initialInfoCards.push({ label: organizerEmailDetail.label || organizerEmailLabel, value: organizerEmailDetail.value, icon: '✉️' });
 
-    const organizerPhoneDetail = form.organizerPhone ? { value: form.organizerPhone, label: 'Phone' } : findCustomDetail((label) => /organizer phone|phone|mobile|contact phone|phone number|tel|telephone/i.test(String(label).toLowerCase()));
-    if (organizerPhoneDetail) infoCards.push({ label: organizerPhoneDetail.label || 'Phone', value: organizerPhoneDetail.value, icon: '📞' });
+    const organizerPhoneLabel = form.sourceTemplate === 'tpl2' ? getLabel('organizerPhone', 'Phone No') : getLabel('organizerPhone', 'Phone');
+    const organizerPhoneDetail = form.organizerPhone ? { value: form.organizerPhone, label: organizerPhoneLabel } : findCustomDetail((label) => /organizer phone|phone|mobile|contact phone|phone number|tel|telephone/i.test(String(label).toLowerCase()));
+    if (organizerPhoneDetail) initialInfoCards.push({ label: organizerPhoneDetail.label || organizerPhoneLabel, value: organizerPhoneDetail.value, icon: '📞' });
 
     // expose simple value variables for later blocks (contact box, etc.)
     const organizerNameVal = organizerNameDetail ? organizerNameDetail.value : (form.organizerName || null);
@@ -95,8 +113,8 @@ export default function PublicFormPage(){
     // Deduplicate infoCards (label+value) and make sure any matched customDetails indexes
     // are recorded in usedCustomIndexes so they are excluded from Key Information.
     const uniqueMap = new Set();
-    const uniqueInfoCards = [];
-    for (const card of infoCards) {
+    const infoCards = [];
+    for (const card of initialInfoCards) {
       const key = `${String(card.label).toLowerCase().trim()}|${String(card.value).trim()}`;
       if (uniqueMap.has(key)) continue;
       uniqueMap.add(key);
@@ -112,7 +130,7 @@ export default function PublicFormPage(){
           } catch (e) {}
         }
       }
-      uniqueInfoCards.push(card);
+      infoCards.push(card);
     }
 
     // Build remaining custom details excluding those we pulled out

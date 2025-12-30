@@ -45,8 +45,10 @@ export default function TemplatesPage() {
       }));
 
       const payload = { 
-        title: tpl.title, 
-        description: tpl.description, 
+        sourceTemplate: tpl._id,
+        ...tpl.formDetails,
+        title: tpl.formDetails?.title || tpl.title, 
+        description: tpl.formDetails?.description || tpl.description, 
         fields: normalizedFields,
         settings: { isPublic: true }
       };

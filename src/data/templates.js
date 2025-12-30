@@ -5,6 +5,16 @@ export const TEMPLATE_LIBRARY = [
     title: "Workshop Registration",
     description: "Collect attendee details for your upcoming workshop or seminar.",
     category: "Events",
+    formDetails: {
+      title: "Workshop Registration Form",
+      description: "Please fill out the form to register for the workshop.",
+      subtitle: "A hands-on workshop on modern web development.",
+      location: "Online via Zoom",
+      date: "2025-12-30",
+      time: "10:00",
+      organizerName: "Gemini Events",
+      organizerEmail: "events@gemini.com",
+    },
     fields: [
       { _id: "f1", type: "short_text", label: "Full Name", required: true, placeholder: "Enter your full name", order: 0 },
       { _id: "f2", type: "email", label: "Email Address", required: true, placeholder: "your.email@example.com", order: 1 },
@@ -20,6 +30,15 @@ export const TEMPLATE_LIBRARY = [
     title: "Job Application",
     description: "Standard job application form with resume upload section.",
     category: "HR",
+    formDetails: {
+      title: "Job Application Form",
+      description: "Please fill out your details to apply for the position.",
+      salary: "e.g., $80,000 - $100,000",
+      location: "e.g., San Francisco, CA",
+      skills: "e.g., React, Node.js, MongoDB",
+      deadline: "2025-12-31",
+      employmentType: "e.g., Full-time",
+    },
     fields: [
       { _id: "f1", type: "short_text", label: "Full Name", required: true, placeholder: "Enter your full name", order: 0 },
       { _id: "f2", type: "email", label: "Email Address", required: true, placeholder: "your.email@example.com", order: 1 },
@@ -36,6 +55,7 @@ export const TEMPLATE_LIBRARY = [
     title: "Customer Feedback",
     description: "Gather insights from your customers about your product.",
     category: "Feedback",
+    formDetails: {},
     fields: [
       { _id: "f1", type: "short_text", label: "Name", required: false, placeholder: "Your name (optional)", order: 0 },
       { _id: "f2", type: "email", label: "Email", required: true, placeholder: "your.email@example.com", order: 1 },
@@ -51,6 +71,7 @@ export const TEMPLATE_LIBRARY = [
     title: "College Admission",
     description: "Comprehensive form for student admission inquiries.",
     category: "Education",
+    formDetails: {},
     fields: [
       { _id: "f1", type: "short_text", label: "First Name", required: true, placeholder: "Enter first name", order: 0 },
       { _id: "f2", type: "short_text", label: "Last Name", required: true, placeholder: "Enter last name", order: 1 },
@@ -68,12 +89,13 @@ export const TEMPLATE_LIBRARY = [
     title: "Event ",
     description: "Simple RSVP form for parties, weddings, and corporate events.",
     category: "Events",
+    formDetails: {},
     fields: [
       { _id: "f1", type: "short_text", label: "Full Name", required: true, placeholder: "Enter your name", order: 0 },
       { _id: "f2", type: "email", label: "Email Address", required: true, placeholder: "your.email@example.com", order: 1 },
       { _id: "f3", type: "radio", label: "Will you attend?", required: true, options: ["Yes, I'll be there", "No, I can't make it"], order: 2 },
       { _id: "f4", type: "number", label: "Number of Guests", required: false, placeholder: "Including yourself", order: 3 },
-      { _id: "f5", type: "dropdown", label: "Dietary Restrictions", required: false, options: ["None", "Vegetarian", "Vegan", "Gluten-Free", "Other"], order: 4 },
+      { _id: "f5", "type": "dropdown", label: "Dietary Restrictions", required: false, options: ["None", "Vegetarian", "Vegan", "Gluten-Free", "Other"], order: 4 },
       { _id: "f6", type: "long_text", label: "Special Requests/Comments", required: false, placeholder: "Any special requirements or messages?", order: 5 }
     ]
   },
@@ -82,6 +104,7 @@ export const TEMPLATE_LIBRARY = [
     title: "Contact Us",
     description: "Basic contact form for your website visitors.",
     category: "General",
+    formDetails: {},
     fields: [
       { _id: "f1", type: "short_text", label: "Your Name", required: true, placeholder: "Enter your name", order: 0 },
       { _id: "f2", type: "email", label: "Email Address", required: true, placeholder: "your.email@example.com", order: 1 },

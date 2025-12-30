@@ -1,16 +1,22 @@
-"use client";
+import EditableLabel from './EditableLabel';
 import { useState } from 'react';
-import axiosClient from '../../api/axiosClient';
 
-export default function Step1FormDetails({ form, onUpdate }) {
+export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisibleFieldsChange, formTemplate }) {
   const fieldTypeOptions = ['Short Text', 'Email', 'Number', 'Long Text', 'Date', 'Time'];
-  // isScratch: true if form is not based on a template (even if it has an _id)
-  const isScratch = !form?.template;
   const [newDetail, setNewDetail] = useState({ label: '', value: '', type: 'Short Text' });
-  const [showLogoField, setShowLogoField] = useState(false);
 
   const handleInputChange = (field, value) => {
     onUpdate({ ...form, [field]: value });
+  };
+
+  const handleLabelUpdate = (field, newLabel) => {
+    onUpdate({
+      ...form,
+      step1Labels: {
+        ...form.step1Labels,
+        [field]: newLabel,
+      },
+    });
   };
 
   const addCustomDetail = () => {
@@ -25,113 +31,179 @@ export default function Step1FormDetails({ form, onUpdate }) {
     onUpdate({ ...form, customDetails: updated });
   };
 
+  const removeField = (field) => {
+    onVisibleFieldsChange(prev => ({ ...prev, [field]: false }));
+    handleInputChange(field, '');
+  };
+
+  const addField = (field) => {
+    onVisibleFieldsChange(prev => ({ ...prev, [field]: true }));
+  };
+
+  const availableFieldsToAdd = visibleFields ? Object.keys(visibleFields).filter(field => !visibleFields[field]) : [];
     
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg p-6 shadow-sm border border-slate-200">
         <h2 className="text-xl font-bold mb-6 text-slate-900">Step 1: Form / Event Details</h2>
         <p className="text-sm text-slate-600 mb-6">
-          Add details about why the form exists. This becomes the landing / info page for participants.
+          Add details about why the form exists. This becomes the landing / info page for participants. You can click on the labels to edit them.
         </p>
 
-        {/* Main fields for template or scratch forms */}
-        {!isScratch ? (
-          <>
-            {/* Template: all main fields */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Form Title / Event Name</label>
-                <input type="text" value={form.title || ''} onChange={(e) => handleInputChange('title', e.target.value)} placeholder="e.g., Workshop Registration" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Short Subtitle (optional)</label>
-                <input type="text" value={form.subtitle || ''} onChange={(e) => handleInputChange('subtitle', e.target.value)} placeholder="e.g., 2024 Annual Workshop" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              </div>
+        {/* Main fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <div className="mb-2">
+              <EditableLabel fieldKey="title" value={form.step1Labels?.title} onUpdate={handleLabelUpdate} defaultLabel="Form Title / Event Name" />
             </div>
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-slate-900 mb-2">Description / Purpose</label>
-              <textarea value={form.description || ''} onChange={(e) => handleInputChange('description', e.target.value)} placeholder="Explain the purpose and details..." rows="4" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            </div>
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <label className="block text-sm font-semibold text-slate-900">Add Logo</label>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked={showLogoField} onChange={(e) => setShowLogoField(e.target.checked)} className="sr-only peer" />
-                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                </label>
+            <input type="text" value={form.title || ''} onChange={(e) => handleInputChange('title', e.target.value)} placeholder="e.g., Workshop Registration" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+          {visibleFields.subtitle && (
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <EditableLabel fieldKey="subtitle" value={form.step1Labels?.subtitle} onUpdate={handleLabelUpdate} defaultLabel="Short Subtitle (optional)" />
+                <button onClick={() => removeField('subtitle')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
-              {showLogoField && (
-                <div>
-                  <input type="file" accept="image/png,image/jpeg,image/jpg,image/gif,image/svg+xml" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onload = (event) => { handleInputChange('logo', event.target?.result || ''); }; reader.readAsDataURL(file); } }} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100" />
-                  {form.logo && (<div className="mt-3"><p className="text-xs text-slate-600 mb-2">Preview:</p><img src={form.logo} alt="Logo preview" className="h-20 w-20 object-cover rounded-lg border border-slate-200" /></div>)}
-                </div>
-              )}
+              <input type="text" value={form.subtitle || ''} onChange={(e) => handleInputChange('subtitle', e.target.value)} placeholder="e.g., 2024 Annual Workshop" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             </div>
-            {/* All original template fields */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-slate-900 mb-2">Location / Mode</label>
-              <input type="text" value={form.location || ''} onChange={(e) => handleInputChange('location', e.target.value)} placeholder="Online / Office / City, etc." className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          )}
+        </div>
+        <div className="mb-6">
+          <div className="mb-2">
+            <EditableLabel fieldKey="description" value={form.step1Labels?.description} onUpdate={handleLabelUpdate} defaultLabel="Description / Purpose" />
+          </div>
+          <textarea value={form.description || ''} onChange={(e) => handleInputChange('description', e.target.value)} placeholder="Explain the purpose and details..." rows="4" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+
+        {visibleFields.logo && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+               <EditableLabel fieldKey="logo" value={form.step1Labels?.logo} onUpdate={handleLabelUpdate} defaultLabel="Logo" />
+              <button onClick={() => removeField('logo')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
             </div>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Date</label>
-                <input type="date" value={form.date || ''} onChange={(e) => handleInputChange('date', e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Time</label>
-                <input type="time" value={form.time || ''} onChange={(e) => handleInputChange('time', e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Organizer Name</label>
-                <input type="text" value={form.organizerName || ''} onChange={(e) => handleInputChange('organizerName', e.target.value)} placeholder="e.g., John Smith" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Organizer Email</label>
-                <input type="email" value={form.organizerEmail || ''} onChange={(e) => handleInputChange('organizerEmail', e.target.value)} placeholder="e.g., john@example.com" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              </div>
-            </div>
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-slate-900 mb-2">Organizer Phone</label>
-              <input type="tel" value={form.organizerPhone || ''} onChange={(e) => handleInputChange('organizerPhone', e.target.value)} placeholder="e.g., +1 (555) 123-4567" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Scratch: only main fields (no location, date, time, organizer fields) */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Form Title / Event Name</label>
-                <input type="text" value={form.title || ''} onChange={(e) => handleInputChange('title', e.target.value)} placeholder="e.g., Workshop Registration" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Short Subtitle (optional)</label>
-                <input type="text" value={form.subtitle || ''} onChange={(e) => handleInputChange('subtitle', e.target.value)} placeholder="e.g., 2024 Annual Workshop" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              </div>
-            </div>
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-slate-900 mb-2">Description / Purpose</label>
-              <textarea value={form.description || ''} onChange={(e) => handleInputChange('description', e.target.value)} placeholder="Explain the purpose and details..." rows="4" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            </div>
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <label className="block text-sm font-semibold text-slate-900">Add Logo</label>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" checked={showLogoField} onChange={(e) => setShowLogoField(e.target.checked)} className="sr-only peer" />
-                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                </label>
-              </div>
-              {showLogoField && (
-                <div>
-                  <input type="file" accept="image/png,image/jpeg,image/jpg,image/gif,image/svg+xml" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onload = (event) => { handleInputChange('logo', event.target?.result || ''); }; reader.readAsDataURL(file); } }} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100" />
-                  {form.logo && (<div className="mt-3"><p className="text-xs text-slate-600 mb-2">Preview:</p><img src={form.logo} alt="Logo preview" className="h-20 w-20 object-cover rounded-lg border border-slate-200" /></div>)}
-                </div>
-              )}
-            </div>
-          </>
+            <input type="file" accept="image/png,image/jpeg,image/jpg,image/gif,image/svg+xml" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onload = (event) => { handleInputChange('logo', event.target?.result || ''); }; reader.readAsDataURL(file); } }} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100" />
+            {form.logo && (<div className="mt-3"><p className="text-xs text-slate-600 mb-2">Preview:</p><img src={form.logo} alt="Logo preview" className="h-20 w-20 object-cover rounded-lg border border-slate-200" /></div>)}
+          </div>
         )}
-        {/* Custom Details Section for both template and scratch forms */}
+
+        {visibleFields.location && (
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <EditableLabel fieldKey="location" value={form.step1Labels?.location} onUpdate={handleLabelUpdate} defaultLabel="Location / Mode" />
+              <button onClick={() => removeField('location')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+            </div>
+            <input type="text" value={form.location || ''} onChange={(e) => handleInputChange('location', e.target.value)} placeholder="Online / Office / City, etc." className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {visibleFields.salary && (
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <EditableLabel fieldKey="salary" value={form.step1Labels?.salary} onUpdate={handleLabelUpdate} defaultLabel="Salary" />
+              <button onClick={() => removeField('salary')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+            </div>
+            <input type="text" value={form.salary || ''} onChange={(e) => handleInputChange('salary', e.target.value)} placeholder="e.g., $100,000 - $120,000" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        )}
+        {visibleFields.employmentType && (
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <EditableLabel fieldKey="employmentType" value={form.step1Labels?.employmentType} onUpdate={handleLabelUpdate} defaultLabel="Employment Type" />
+              <button onClick={() => removeField('employmentType')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+            </div>
+            <input type="text" value={form.employmentType || ''} onChange={(e) => handleInputChange('employmentType', e.target.value)} placeholder="e.g., Full-time, Contract" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        )}
+        {visibleFields.skills && (
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <EditableLabel fieldKey="skills" value={form.step1Labels?.skills} onUpdate={handleLabelUpdate} defaultLabel="Skills" />
+                <button onClick={() => removeField('skills')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+              </div>
+              <input type="text" value={form.skills || ''} onChange={(e) => handleInputChange('skills', e.target.value)} placeholder="e.g., React, Node.js, ..." className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          )}
+          {visibleFields.deadline && (
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <EditableLabel fieldKey="deadline" value={form.step1Labels?.deadline} onUpdate={handleLabelUpdate} defaultLabel="Application Deadline" />
+                <button onClick={() => removeField('deadline')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+              </div>
+              <input type="date" value={form.deadline || ''} onChange={(e) => handleInputChange('deadline', e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {visibleFields.date && (
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                 <EditableLabel fieldKey="date" value={form.step1Labels?.date} onUpdate={handleLabelUpdate} defaultLabel="Date" />
+                <button onClick={() => removeField('date')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+              </div>
+              <input type="date" value={form.date || ''} onChange={(e) => handleInputChange('date', e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          )}
+          {visibleFields.time && (
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <EditableLabel fieldKey="time" value={form.step1Labels?.time} onUpdate={handleLabelUpdate} defaultLabel="Time" />
+                <button onClick={() => removeField('time')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+              </div>
+              <input type="time" value={form.time || ''} onChange={(e) => handleInputChange('time', e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {visibleFields.organizerName && (
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <EditableLabel fieldKey="organizerName" value={form.step1Labels?.organizerName} onUpdate={handleLabelUpdate} defaultLabel="Organizer Name" />
+                <button onClick={() => removeField('organizerName')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+              </div>
+              <input type="text" value={form.organizerName || ''} onChange={(e) => handleInputChange('organizerName', e.target.value)} placeholder="e.g., John Smith" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          )}
+          {visibleFields.organizerEmail && (
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <EditableLabel fieldKey="organizerEmail" value={form.step1Labels?.organizerEmail} onUpdate={handleLabelUpdate} formTemplate={formTemplate} />
+                <button onClick={() => removeField('organizerEmail')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+              </div>
+              <input type="email" value={form.organizerEmail || ''} onChange={(e) => handleInputChange('organizerEmail', e.target.value)} placeholder="e.g., john@example.com" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          )}
+        </div>
+        {visibleFields.organizerPhone && (
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <EditableLabel fieldKey="organizerPhone" value={form.step1Labels?.organizerPhone} onUpdate={handleLabelUpdate} formTemplate={formTemplate} />
+              <button onClick={() => removeField('organizerPhone')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+            </div>
+            <input type="tel" value={form.organizerPhone || ''} onChange={(e) => handleInputChange('organizerPhone', e.target.value)} placeholder="e.g., +1 (555) 123-4567" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        )}
+        
+        {availableFieldsToAdd.length > 0 && (
+          <div className="mb-6">
+            <p className="text-sm text-slate-600 mb-2">Add more details:</p>
+            <div className="flex flex-wrap gap-2">
+              {availableFieldsToAdd.map(field => (
+                <button
+                  key={field}
+                  onClick={() => addField(field)}
+                  className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded-md"
+                >
+                  + {field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Custom Details Section */}
         <div className="border-t pt-6">
           <h3 className="text-sm font-bold text-slate-900 mb-3">Additional Details (custom)</h3>
           <p className="text-xs text-slate-500 mb-4">Add more structured details about the event/purpose (e.g., Speaker Name, Duration, Mode, Eligibility, Logo, etc.).</p>

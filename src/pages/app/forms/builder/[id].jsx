@@ -41,12 +41,14 @@ function QrImage({ publicUrl }) {
 }
 import { formApi } from '../../../../api/formApi';
 import { useAuthStore } from '../../../../store/authStore';
+import { TEMPLATE_LIBRARY } from '../../../../data/templates';
 
 export default function FormBuilderPage() {
   const router = useRouter();
   const { id } = router.query;
   const user = useAuthStore((state) => state.user);
   const [form, setForm] = useState(null);
+  const [step1VisibleFields, setStep1VisibleFields] = useState(null);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState('');
   const [step, setStep] = useState(1);
@@ -60,8 +62,9 @@ export default function FormBuilderPage() {
     if (!id) return;
 
     const load = async () => {
+      let loadedForm;
       if (id === 'new') {
-        setForm({
+        loadedForm = {
           title: 'Untitled form',
           subtitle: '',
           description: '',
@@ -72,22 +75,65 @@ export default function FormBuilderPage() {
           organizerEmail: '',
           organizerPhone: '',
           logo: '',
+          salary: '',
+          skills: '',
+          deadline: '',
+          employmentType: '',
           customDetails: [],
           fields: [],
           settings: { isPublic: true },
-        });
-        return;
+          step1Labels: {},
+        };
+      } else {
+        try {
+          const { data } = await formApi.getForm(id);
+          loadedForm = {
+            logo: data.logo || '',
+            ...data,
+          };
+        } catch (error) {
+          console.error('Error loading form:', error);
+          return;
+        }
       }
+      setForm(loadedForm);
+      
+      const commonFields = ['date', 'time', 'organizerEmail', 'organizerPhone', 'logo', 'subtitle'];
+      const workshopFields = ['organizerName', 'location'];
+      const jobApplicationFields = ['salary', 'skills', 'deadline', 'employmentType'];
+      const allPossibleOptionalFields = [...new Set([...commonFields, ...workshopFields, ...jobApplicationFields])];
 
-      try {
-        const { data } = await formApi.getForm(id);
-        setForm({
-          logo: data.logo || '',
-          ...data,
-        });
-      } catch (error) {
-        console.error('Error loading form:', error);
+      const visibility = {};
+
+      if (id === 'new' && !loadedForm.sourceTemplate) { // New blank form
+          allPossibleOptionalFields.forEach(field => visibility[field] = false);
+      } else { // Existing form, or new from template
+          let allowedFields;
+          if (loadedForm.sourceTemplate === 'tpl1') { // Workshop
+              allowedFields = [...commonFields, ...workshopFields];
+          } else if (loadedForm.sourceTemplate === 'tpl2') { // Job Application
+              allowedFields = [...commonFields, ...jobApplicationFields];
+          } else { // Other templates or forms without a template
+              allowedFields = allPossibleOptionalFields;
+          }
+          
+          // A field should be in the visibility map if it's allowed for the template, OR if it already has data (for legacy forms).
+          const fieldsWithData = allPossibleOptionalFields.filter(field => !!loadedForm[field]);
+          const fieldsToIncludeInVisibility = [...new Set([...allowedFields, ...fieldsWithData])];
+
+          fieldsToIncludeInVisibility.forEach(field => {
+              visibility[field] = !!loadedForm[field];
+          });
+
+          // Ensure all fields that should be addable are in the visibility object, even if they don't have data yet.
+          allowedFields.forEach(field => {
+            if (!(field in visibility)) {
+              visibility[field] = false;
+            }
+          });
       }
+      
+      setStep1VisibleFields(visibility);
     };
 
     load();
@@ -173,7 +219,7 @@ export default function FormBuilderPage() {
     };
   }, []);
 
-  if (!form) {
+  if (!form || !step1VisibleFields) {
     return (
       <AppLayout>
         <div className="flex items-center justify-center h-[calc(100vh-200px)]">
@@ -202,7 +248,13 @@ export default function FormBuilderPage() {
         <div className="bg-white/90 border border-slate-200 rounded-2xl flex-1 min-h-0 overflow-hidden flex flex-col">
           {step === 1 && (
             <div className="overflow-y-auto p-6">
-              <Step1FormDetails form={form} onUpdate={setForm} />
+              <Step1FormDetails
+                form={form}
+                onUpdate={setForm}
+                visibleFields={step1VisibleFields}
+                onVisibleFieldsChange={setStep1VisibleFields}
+                formTemplate={form.sourceTemplate}
+              />
               
               <div className="mt-6 flex justify-between">
                 <div />
