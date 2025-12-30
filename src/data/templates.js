@@ -12,8 +12,8 @@ export const TEMPLATE_LIBRARY = [
       location: "Online via Zoom",
       date: "2025-12-30",
       time: "10:00",
-      organizerName: "Gemini Events",
-      organizerEmail: "events@gemini.com",
+      organizerName: " Events",
+      organizerEmail: "events@gmail.com",
     },
     fields: [
       { _id: "f1", type: "short_text", label: "Full Name", required: true, placeholder: "Enter your full name", order: 0 },
