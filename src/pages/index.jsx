@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import logo from '../assets/logo.png';
+import bg from '../assets/bg.jpeg';
 import { TEMPLATE_LIBRARY } from '../data/templates';
 import { formApi } from '../api/formApi';
 import { useAuthStore } from '../store/authStore';
@@ -51,7 +52,7 @@ export default function Home() {
     }
   };
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100/50 text-[var(--text)]">
       {/* Header */}
       <header className="border-b border-slate-200/80 bg-white/95 backdrop-blur-md sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -94,13 +95,19 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-emerald-500/10 pointer-events-none" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl opacity-20" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl opacity-20" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 min-h-screen">
+        {/* Background Image */}
+        <div className="absolute inset-0 opacity-100 pointer-events-none">
+          <Image 
+            src={bg} 
+            alt="Background illustration" 
+            fill 
+            className="object-cover object-center"
+            priority
+          />
+        </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 pb-40 sm:pb-56">
           <div className="text-center">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
               <span className="bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
@@ -214,7 +221,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {TEMPLATE_LIBRARY.map((t) => {
+            {TEMPLATE_LIBRARY.slice(0, 6).map((t) => {
               const category = (t.category || 'General').toLowerCase();
               const colorMap = {
                 events: 'bg-rose-400',
@@ -222,6 +229,10 @@ export default function Home() {
                 feedback: 'bg-violet-400',
                 education: 'bg-orange-400',
                 general: 'bg-sky-400',
+                survey: 'bg-purple-400',
+                product: 'bg-blue-400',
+                travel: 'bg-cyan-400',
+                appointment: 'bg-pink-400',
               };
               const stripeClass = colorMap[category] || 'bg-sky-400';
 
@@ -239,7 +250,7 @@ export default function Home() {
                   </div>
 
                   {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-slate-900/60 via-slate-900/50 to-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-md rounded-2xl">
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-slate-900/30 to-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-md rounded-2xl">
                     <div className="flex gap-3 flex-wrap justify-center px-4">
                       <button
                         onClick={() => setSelectedTemplate(t)}
