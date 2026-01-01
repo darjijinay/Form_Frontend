@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { authApi } from '../../api/authApi';
 import { validatePassword, getPasswordHintText } from '../../utils/passwordValidation';
 import logo from '../../assets/logo.png';
-import loginImg from '../../assets/bg.jpeg';
+import loginImg from '../../assets/login.jpeg';
 
 export default function SetNewPasswordPage() {
   const router = useRouter();

@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { authApi } from '../../api/authApi';
 import { useAuthStore } from '../../store/authStore';
 import logo from '../../assets/logo.png';
+import loginImg from '../../assets/login.jpeg';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -82,7 +83,16 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
+    <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center relative overflow-hidden">
+      {/* Background Image */}
+      <div className="absolute inset-0" style={{
+        backgroundImage: `url(${loginImg.src})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center top',
+        backgroundRepeat: 'no-repeat',
+        opacity: '1',
+      }} />
+      
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-100/60 via-transparent to-emerald-100/40 pointer-events-none" />
       <div className="w-full max-w-md mx-auto px-4 z-10">
         <div className="bg-white rounded-2xl shadow-2xl p-8 text-center">

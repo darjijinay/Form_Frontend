@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { authApi } from '../../api/authApi';
 import logo from '../../assets/logo.png';
-import loginImg from '../../assets/bg.jpeg';
+import loginImg from '../../assets/login.jpeg';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
