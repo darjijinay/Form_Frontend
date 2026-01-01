@@ -73,6 +73,11 @@ export default function LoginPage() {
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Password</label>
                   <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition" type="password" required />
                 </div>
+                <div className="text-right">
+                  <Link href={email ? `/auth/reset-password?email=${encodeURIComponent(email)}` : '/auth/reset-password'} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium hover:underline">
+                    Forgot Password?
+                  </Link>
+                </div>
               </>
             )}
             {step === 2 && (

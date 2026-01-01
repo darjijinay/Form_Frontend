@@ -4,6 +4,9 @@ import { useState } from 'react';
 export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisibleFieldsChange, formTemplate }) {
   const fieldTypeOptions = ['Short Text', 'Email', 'Number', 'Long Text', 'Date', 'Time'];
   const [newDetail, setNewDetail] = useState({ label: '', value: '', type: 'Short Text' });
+  const [isDateFocused, setDateFocused] = useState(false);
+  const [isTimeFocused, setTimeFocused] = useState(false);
+  const [isDeadlineFocused, setDeadlineFocused] = useState(false);
 
   const handleInputChange = (field, value) => {
     onUpdate({ ...form, [field]: value });
@@ -40,7 +43,28 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
     onVisibleFieldsChange(prev => ({ ...prev, [field]: true }));
   };
 
-  const availableFieldsToAdd = visibleFields ? Object.keys(visibleFields).filter(field => !visibleFields[field]) : [];
+    const availableFieldsToAdd = Object.keys(visibleFields || {})
+    .filter(field => !visibleFields[field]) // find fields that are not visible
+    .filter(field => {
+      const workshopFields = ['organizerName', 'organizerEmail', 'organizerPhone'];
+      const jobApplicationFields = ['salary', 'employmentType', 'skills', 'deadline'];
+      
+      if (formTemplate === 'tpl1') {
+        return !jobApplicationFields.includes(field);
+      }
+      if (formTemplate === 'tpl2') {
+        return !workshopFields.includes(field);
+      }
+      // For other templates, don't show any of the specific fields for tpl1 and tpl2
+      if (formTemplate && formTemplate !== 'tpl1' && formTemplate !== 'tpl2') {
+        return !jobApplicationFields.includes(field) && !workshopFields.includes(field);
+      }
+      // if no template is selected , show all fields
+      if (!formTemplate) {
+        return true
+      }
+      return true;
+    });
     
   return (
     <div className="space-y-6">
@@ -97,7 +121,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {visibleFields.salary && (
+        {formTemplate === 'tpl2' && visibleFields.salary && (
           <div>
             <div className="flex justify-between items-center mb-2">
               <EditableLabel fieldKey="salary" value={form.step1Labels?.salary} onUpdate={handleLabelUpdate} defaultLabel="Salary" />
@@ -106,7 +130,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
             <input type="text" value={form.salary || ''} onChange={(e) => handleInputChange('salary', e.target.value)} placeholder="e.g., $100,000 - $120,000" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
         )}
-        {visibleFields.employmentType && (
+        {formTemplate === 'tpl2' && visibleFields.employmentType && (
           <div>
             <div className="flex justify-between items-center mb-2">
               <EditableLabel fieldKey="employmentType" value={form.step1Labels?.employmentType} onUpdate={handleLabelUpdate} defaultLabel="Employment Type" />
@@ -115,7 +139,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
             <input type="text" value={form.employmentType || ''} onChange={(e) => handleInputChange('employmentType', e.target.value)} placeholder="e.g., Full-time, Contract" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
         )}
-        {visibleFields.skills && (
+        {formTemplate === 'tpl2' && visibleFields.skills && (
             <div>
               <div className="flex justify-between items-center mb-2">
                 <EditableLabel fieldKey="skills" value={form.step1Labels?.skills} onUpdate={handleLabelUpdate} defaultLabel="Skills" />
@@ -124,13 +148,21 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
               <input type="text" value={form.skills || ''} onChange={(e) => handleInputChange('skills', e.target.value)} placeholder="e.g., React, Node.js, ..." className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             </div>
           )}
-          {visibleFields.deadline && (
+          {formTemplate === 'tpl2' && visibleFields.deadline && (
             <div>
               <div className="flex justify-between items-center mb-2">
                 <EditableLabel fieldKey="deadline" value={form.step1Labels?.deadline} onUpdate={handleLabelUpdate} defaultLabel="Application Deadline" />
                 <button onClick={() => removeField('deadline')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
-              <input type="date" value={form.deadline || ''} onChange={(e) => handleInputChange('deadline', e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <input
+                type={isDeadlineFocused || form.deadline ? 'date' : 'text'}
+                value={form.deadline || ''}
+                onChange={(e) => handleInputChange('deadline', e.target.value)}
+                onFocus={() => setDeadlineFocused(true)}
+                onBlur={() => setDeadlineFocused(false)}
+                placeholder='Select application deadline'
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
           )}
         </div>
@@ -142,7 +174,15 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
                  <EditableLabel fieldKey="date" value={form.step1Labels?.date} onUpdate={handleLabelUpdate} defaultLabel="Date" />
                 <button onClick={() => removeField('date')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
-              <input type="date" value={form.date || ''} onChange={(e) => handleInputChange('date', e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <input
+                type={isDateFocused || form.date ? 'date' : 'text'}
+                value={form.date || ''}
+                onChange={(e) => handleInputChange('date', e.target.value)}
+                onFocus={() => setDateFocused(true)}
+                onBlur={() => setDateFocused(false)}
+                placeholder='Select date'
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
           )}
           {visibleFields.time && (
@@ -151,13 +191,21 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
                 <EditableLabel fieldKey="time" value={form.step1Labels?.time} onUpdate={handleLabelUpdate} defaultLabel="Time" />
                 <button onClick={() => removeField('time')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
-              <input type="time" value={form.time || ''} onChange={(e) => handleInputChange('time', e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <input
+                type={isTimeFocused || form.time ? 'time' : 'text'}
+                value={form.time || ''}
+                onChange={(e) => handleInputChange('time', e.target.value)}
+                onFocus={() => setTimeFocused(true)}
+                onBlur={() => setTimeFocused(false)}
+                placeholder='Select time'
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
           )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {visibleFields.organizerName && (
+          {formTemplate === 'tpl1' && visibleFields.organizerName && (
             <div>
               <div className="flex justify-between items-center mb-2">
                 <EditableLabel fieldKey="organizerName" value={form.step1Labels?.organizerName} onUpdate={handleLabelUpdate} defaultLabel="Organizer Name" />
@@ -166,17 +214,17 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
               <input type="text" value={form.organizerName || ''} onChange={(e) => handleInputChange('organizerName', e.target.value)} placeholder="e.g., John Smith" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             </div>
           )}
-          {visibleFields.organizerEmail && (
+          {formTemplate === 'tpl1' && visibleFields.organizerEmail && (
             <div>
               <div className="flex justify-between items-center mb-2">
-                <EditableLabel fieldKey="organizerEmail" value={form.step1Labels?.organizerEmail} onUpdate={handleLabelUpdate} formTemplate={formTemplate} />
+                <EditableLabel fieldKey="organizerEmail" value={form.step1Labels?.organizerEmail} onUpdate={handleLabelUpdate} defaultLabel="Organizer Email" />
                 <button onClick={() => removeField('organizerEmail')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
-              <input type="email" value={form.organizerEmail || ''} onChange={(e) => handleInputChange('organizerEmail', e.target.value)} placeholder="e.g., john@example.com" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <input type="email" value={form.organizerEmail || ''} onChange={(e) => handleInputChange('organizerEmail', e.target.value)} placeholder="e.g., event.organizer@example.com" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             </div>
           )}
         </div>
-        {visibleFields.organizerPhone && (
+        {formTemplate === 'tpl1' && visibleFields.organizerPhone && (
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <EditableLabel fieldKey="organizerPhone" value={form.step1Labels?.organizerPhone} onUpdate={handleLabelUpdate} formTemplate={formTemplate} />
@@ -228,7 +276,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
               {newDetail.type === 'Long Text' ? (
                 <textarea value={newDetail.value} onChange={(e) => setNewDetail({ ...newDetail, value: e.target.value })} placeholder="e.g., Detailed info about the agenda, speakers, etc." rows="4" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
               ) : newDetail.type === 'Date' ? (
-                <input type="date" value={newDetail.value} onChange={(e) => setNewDetail({ ...newDetail, value: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer" style={{ colorScheme: 'light' }} />
+                <input type="date" value={newDetail.value} onChange={(e) => setNewDetail({ ...newDetail, value: e.g. target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer" style={{ colorScheme: 'light' }} />
               ) : newDetail.type === 'Time' ? (
                 <input type="time" value={newDetail.value} onChange={(e) => setNewDetail({ ...newDetail, value: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer" style={{ colorScheme: 'light' }} />
               ) : (

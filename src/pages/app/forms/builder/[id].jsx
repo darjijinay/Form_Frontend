@@ -63,27 +63,29 @@ export default function FormBuilderPage() {
 
     const load = async () => {
       let loadedForm;
+      const templateId = router.query.templateId;
+
       if (id === 'new') {
         loadedForm = {
           title: 'Untitled form',
-          subtitle: '',
           description: '',
-          date: '',
-          time: '',
-          location: '',
-          organizerName: '',
-          organizerEmail: '',
-          organizerPhone: '',
-          logo: '',
-          salary: '',
-          skills: '',
-          deadline: '',
-          employmentType: '',
-          customDetails: [],
           fields: [],
           settings: { isPublic: true },
           step1Labels: {},
         };
+
+        if (templateId) {
+          const template = TEMPLATE_LIBRARY.find(t => t.id === templateId);
+          if (template) {
+            loadedForm = {
+              ...loadedForm,
+              ...template.formDetails,
+              sourceTemplate: templateId,
+              fields: template.fields,
+              title: template.formDetails.title || 'Untitled form',
+            };
+          }
+        }
       } else {
         try {
           const { data } = await formApi.getForm(id);
@@ -97,40 +99,19 @@ export default function FormBuilderPage() {
         }
       }
       setForm(loadedForm);
-      
-      const commonFields = ['date', 'time', 'organizerEmail', 'organizerPhone', 'logo', 'subtitle'];
-      const workshopFields = ['organizerName', 'location'];
-      const jobApplicationFields = ['salary', 'skills', 'deadline', 'employmentType'];
-      const allPossibleOptionalFields = [...new Set([...commonFields, ...workshopFields, ...jobApplicationFields])];
 
+      const template = loadedForm.sourceTemplate ? TEMPLATE_LIBRARY.find(t => t.id === loadedForm.sourceTemplate) : null;
+      const allPossibleOptionalFields = ['date', 'time', 'organizerEmail', 'organizerPhone', 'logo', 'subtitle', 'organizerName', 'location', 'salary', 'skills', 'deadline', 'employmentType'];
       const visibility = {};
 
-      if (id === 'new' && !loadedForm.sourceTemplate) { // New blank form
-          allPossibleOptionalFields.forEach(field => visibility[field] = false);
-      } else { // Existing form, or new from template
-          let allowedFields;
-          if (loadedForm.sourceTemplate === 'tpl1') { // Workshop
-              allowedFields = [...commonFields, ...workshopFields];
-          } else if (loadedForm.sourceTemplate === 'tpl2') { // Job Application
-              allowedFields = [...commonFields, ...jobApplicationFields];
-          } else { // Other templates or forms without a template
-              allowedFields = allPossibleOptionalFields;
-          }
-          
-          // A field should be in the visibility map if it's allowed for the template, OR if it already has data (for legacy forms).
-          const fieldsWithData = allPossibleOptionalFields.filter(field => !!loadedForm[field]);
-          const fieldsToIncludeInVisibility = [...new Set([...allowedFields, ...fieldsWithData])];
-
-          fieldsToIncludeInVisibility.forEach(field => {
-              visibility[field] = !!loadedForm[field];
-          });
-
-          // Ensure all fields that should be addable are in the visibility object, even if they don't have data yet.
-          allowedFields.forEach(field => {
-            if (!(field in visibility)) {
-              visibility[field] = false;
-            }
-          });
+      if (template) {
+        // Template defines visibility
+        Object.assign(visibility, template.step1VisibleFields);
+      } else {
+        // No template, or new blank form: visibility is based on existing data
+        allPossibleOptionalFields.forEach(field => {
+          visibility[field] = !!loadedForm[field];
+        });
       }
       
       setStep1VisibleFields(visibility);
