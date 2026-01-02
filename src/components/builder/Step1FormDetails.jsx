@@ -1,6 +1,93 @@
 import EditableLabel from './EditableLabel';
 import { useState } from 'react';
 
+const fieldCategories = {
+  'Basic': ['subtitle', 'logo', 'headerImage', 'location'],
+  'Event': ['date', 'time', 'organizerName', 'organizerEmail', 'organizerPhone'],
+  'Job Application': ['salary', 'employmentType', 'skills', 'deadline']
+};
+
+const fieldLabels = {
+    subtitle: 'Short Subtitle',
+    logo: 'Logo',
+    headerImage: 'Header Image',
+    location: 'Location / Mode',
+    date: 'Date',
+    time: 'Time',
+    organizerName: 'Organizer Name',
+    organizerEmail: 'Organizer Email',
+    organizerPhone: 'Organizer Phone',
+    salary: 'Salary',
+    employmentType: 'Employment Type',
+    skills: 'Skills',
+    deadline: 'Application Deadline'
+};
+
+const AddFieldDropdown = ({ onAddField, availableFields, formTemplate }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const getVisibleCategories = () => {
+    const visibleCategories = {};
+    for (const category in fieldCategories) {
+      const fields = fieldCategories[category].filter(field => availableFields.includes(field));
+      if (fields.length > 0) {
+        if (formTemplate === 'tpl1' && category === 'Job Application') continue;
+        if (formTemplate === 'tpl2' && category === 'Event') continue;
+        visibleCategories[category] = fields;
+      }
+    }
+    return visibleCategories;
+  };
+  
+  const visibleCategories = getVisibleCategories();
+
+  if (Object.keys(visibleCategories).length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="relative inline-block text-left">
+      <div>
+        <button
+          type="button"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-200"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <span className="font-bold">+</span>
+          Add Field
+        </button>
+      </div>
+      {isOpen && (
+        <div 
+          className="origin-top-right absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+          role="menu"
+        >
+          <div className="py-1" role="none">
+            {Object.entries(visibleCategories).map(([category, fields]) => (
+              <div key={category}>
+                <p className="px-4 py-2 text-xs text-slate-500 uppercase">{category}</p>
+                {fields.map(field => (
+                  <button
+                    key={field}
+                    onClick={() => {
+                      onAddField(field);
+                      setIsOpen(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                    role="menuitem"
+                  >
+                    {fieldLabels[field]}
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisibleFieldsChange, formTemplate }) {
   const fieldTypeOptions = ['Short Text', 'Email', 'Number', 'Long Text', 'Date', 'Time'];
   const [newDetail, setNewDetail] = useState({ label: '', value: '', type: 'Short Text' });
@@ -43,28 +130,8 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
     onVisibleFieldsChange(prev => ({ ...prev, [field]: true }));
   };
 
-    const availableFieldsToAdd = Object.keys(visibleFields || {})
-    .filter(field => !visibleFields[field]) // find fields that are not visible
-    .filter(field => {
-      const workshopFields = ['organizerName', 'organizerEmail', 'organizerPhone'];
-      const jobApplicationFields = ['salary', 'employmentType', 'skills', 'deadline'];
-      
-      if (formTemplate === 'tpl1') {
-        return !jobApplicationFields.includes(field);
-      }
-      if (formTemplate === 'tpl2') {
-        return !workshopFields.includes(field);
-      }
-      // For other templates, don't show any of the specific fields for tpl1 and tpl2
-      if (formTemplate && formTemplate !== 'tpl1' && formTemplate !== 'tpl2') {
-        return !jobApplicationFields.includes(field) && !workshopFields.includes(field);
-      }
-      // if no template is selected , show all fields
-      if (!formTemplate) {
-        return true
-      }
-      return true;
-    });
+  const availableFieldsToAdd = Object.keys(visibleFields || {})
+  .filter(field => !visibleFields[field]);
     
   return (
     <div className="space-y-6">
@@ -107,6 +174,17 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
             </div>
             <input type="file" accept="image/png,image/jpeg,image/jpg,image/gif,image/svg+xml" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onload = (event) => { handleInputChange('logo', event.target?.result || ''); }; reader.readAsDataURL(file); } }} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100" />
             {form.logo && (<div className="mt-3"><p className="text-xs text-slate-600 mb-2">Preview:</p><img src={form.logo} alt="Logo preview" className="h-20 w-20 object-cover rounded-lg border border-slate-200" /></div>)}
+          </div>
+        )}
+        
+        {visibleFields.headerImage && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+               <EditableLabel fieldKey="headerImage" value={form.step1Labels?.headerImage} onUpdate={handleLabelUpdate} defaultLabel="Header Image" />
+              <button onClick={() => removeField('headerImage')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+            </div>
+            <input type="file" accept="image/png,image/jpeg,image/jpg,image/gif" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onload = (event) => { handleInputChange('headerImage', event.target?.result || ''); }; reader.readAsDataURL(file); } }} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100" />
+            {form.headerImage && (<div className="mt-3"><p className="text-xs text-slate-600 mb-2">Preview:</p><img src={form.headerImage} alt="Header image preview" className="w-full h-48 object-cover rounded-lg border border-slate-200" /></div>)}
           </div>
         )}
 
@@ -234,22 +312,9 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
           </div>
         )}
         
-        {availableFieldsToAdd.length > 0 && (
-          <div className="mb-6">
-            <p className="text-sm text-slate-600 mb-2">Add more details:</p>
-            <div className="flex flex-wrap gap-2">
-              {availableFieldsToAdd.map(field => (
-                <button
-                  key={field}
-                  onClick={() => addField(field)}
-                  className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded-md"
-                >
-                  + {field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        <div className="mb-6">
+          <AddFieldDropdown onAddField={addField} availableFields={availableFieldsToAdd} formTemplate={formTemplate} />
+        </div>
 
         {/* Custom Details Section */}
         <div className="border-t pt-6">

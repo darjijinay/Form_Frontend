@@ -6,17 +6,132 @@ import { formApi } from "../../api/formApi";
 import { templateApi } from "../../api/templateApi";
 
 const FALLBACK_TEMPLATES = [
-  { id: "tpl1", title: "Workshop Registration", description: "Collect attendee details for your upcoming workshop or seminar.", category: "Events" },
-  { id: "tpl2", title: "Job Application", description: "Standard job application form with resume upload section.", category: "HR" },
-  { id: "tpl3", title: "Customer Feedback", description: "Gather insights from your customers about your product.", category: "Feedback" },
-  { id: "tpl4", title: "College Admission", description: "Comprehensive form for student admission inquiries.", category: "Education" },
-  { id: "tpl5", title: "Event RSVP", description: "Simple RSVP form for parties, weddings, and corporate events.", category: "Events" },
-  { id: "tpl6", title: "Contact Us", description: "Basic contact form for your website visitors.", category: "General" },
-  { id: "tpl7", title: "Quick Survey", description: "Simple multi-choice survey template.", category: "Survey" },
-  { id: "tpl8", title: "Product Template", description: "Product order form with customer and product details.", category: "Product" },
-  { id: "tpl9", title: "Course Template", description: "Collect course enrollment details from students.", category: "Education" },
-  { id: "tpl10", title: "Trip Package Template", description: "Capture trip package details and traveler info.", category: "Travel" },
-  { id: "tpl11", title: "Appointment Booking Template", description: "Book appointments with preferred service and time slot.", category: "Appointment" },
+  { 
+    id: "tpl1", 
+    title: "Workshop Registration", 
+    description: "Collect attendee details for your upcoming workshop or seminar.", 
+    category: "Events",
+    fields: [
+      { label: 'Full Name', type: 'short_text' },
+      { label: 'Email Address', type: 'email' },
+      { label: 'Company/Organization', type: 'short_text' },
+      { label: 'Dietary Restrictions', type: 'long_text' }
+    ]
+  },
+  { 
+    id: "tpl2", 
+    title: "Job Application", 
+    description: "Standard job application form with resume upload section.", 
+    category: "HR",
+    fields: [
+      { label: 'Full Name', type: 'short_text' },
+      { label: 'Email', type: 'email' },
+      { label: 'Phone Number', type: 'number' },
+      { label: 'Resume/CV', type: 'file' },
+      { label: 'Cover Letter', type: 'long_text' }
+    ]
+  },
+  { 
+    id: "tpl3", 
+    title: "Customer Feedback", 
+    description: "Gather insights from your customers about your product.", 
+    category: "Feedback",
+    fields: [
+      { label: 'Overall Satisfaction', type: 'rating' },
+      { label: 'What did you like most?', type: 'long_text' },
+      { label: 'What can we improve?', type: 'long_text' },
+      { label: 'Would you recommend us?', type: 'radio', options: ['Yes', 'No'] }
+    ]
+  },
+  { 
+    id: "tpl4", 
+    title: "College Admission", 
+    description: "Comprehensive form for student admission inquiries.", 
+    category: "Education",
+    fields: [
+        { label: 'Full Name', type: 'short_text' },
+        { label: 'Date of Birth', type: 'date' },
+        { label: 'Email Address', type: 'email' },
+        { label: 'High School Transcript', type: 'file' },
+        { label: 'Essay', type: 'long_text' }
+    ]
+  },
+  { 
+    id: "tpl5", 
+    title: "Event RSVP", 
+    description: "Simple RSVP form for parties, weddings, and corporate events.", 
+    category: "Events",
+    fields: [
+        { label: 'Full Name', type: 'short_text' },
+        { label: 'Will you be attending?', type: 'radio', options: ['Yes, I will attend', 'No, I cannot attend'] },
+        { label: 'Number of Guests', type: 'number' }
+    ]
+  },
+  { 
+    id: "tpl6", 
+    title: "Contact Us", 
+    description: "Basic contact form for your website visitors.", 
+    category: "General",
+    fields: [
+        { label: 'Your Name', type: 'short_text' },
+        { label: 'Your Email', type: 'email' },
+        { label: 'Message', type: 'long_text' }
+    ]
+  },
+  { 
+    id: "tpl7", 
+    title: "Quick Survey", 
+    description: "Simple multi-choice survey template.", 
+    category: "Survey",
+    fields: [
+        { label: 'What is your favorite color?', type: 'radio', options: ['Red', 'Green', 'Blue'] },
+        { label: 'Which features are most important to you?', type: 'checkbox', options: ['Feature A', 'Feature B', 'Feature C'] }
+    ]
+  },
+  {
+    id: "tpl8",
+    title: "Product Template",
+    description: "Product order form with customer and product details.",
+    category: "Product",
+    fields: [
+      { label: 'Product Name', type: 'short_text' },
+      { label: 'Quantity', type: 'number' },
+      { label: 'Shipping Address', type: 'long_text' }
+    ]
+  },
+  {
+    id: "tpl9",
+    title: "Course Template",
+    description: "Collect course enrollment details from students.",
+    category: "Education",
+    fields: [
+      { label: 'Student Name', type: 'short_text' },
+      { label: 'Course', type: 'dropdown', options: ['Math', 'Science', 'History'] },
+      { label: 'Student ID', type: 'number' }
+    ]
+  },
+  {
+    id: "tpl10",
+    title: "Trip Package Template",
+    description: "Capture trip package details and traveler info.",
+    category: "Travel",
+    fields: [
+      { label: 'Destination', type: 'short_text' },
+      { label: 'Travel Dates', type: 'date' },
+      { label: 'Number of Travelers', type: 'number' }
+    ]
+  },
+  {
+    id: "tpl11",
+    title: "Appointment Booking Template",
+    description: "Book appointments with preferred service and time slot.",
+    category: "Appointment",
+    fields: [
+      { label: 'Service', type: 'dropdown', options: ['Service A', 'Service B'] },
+      { label: 'Preferred Date', type: 'date' },
+      { label: 'Preferred Time', type: 'time' }
+    ]
+  }
 ];
 
 export default function TemplatesPage() {

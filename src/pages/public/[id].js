@@ -143,6 +143,16 @@ export default function PublicFormPage(){
         <div className="max-w-5xl mx-auto">
           {/* Hero */}
           <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+            {form.headerImage && (
+              <div className="w-full h-64">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={getImageUrl(form.headerImage)} 
+                  alt="Header Image" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
             {/* Header with gradient */}
             <div className="relative bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 px-6 sm:px-10 py-10 sm:py-14">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1),transparent_50%)]" />

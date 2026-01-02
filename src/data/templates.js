@@ -18,6 +18,7 @@ export const TEMPLATE_LIBRARY = [
     step1VisibleFields: {
       subtitle: true,
       logo: true,
+      headerImage: false,
       location: true,
       date: true,
       time: true,
@@ -56,6 +57,7 @@ export const TEMPLATE_LIBRARY = [
     step1VisibleFields: {
       subtitle: true,
       logo: true,
+      headerImage: false,
       location: true,
       date: true,
       time: true,
@@ -86,6 +88,7 @@ export const TEMPLATE_LIBRARY = [
     step1VisibleFields: {
       subtitle: false,
       logo: false,
+      headerImage: false,
       location: false,
       date: false,
       time: false,
@@ -116,6 +119,7 @@ export const TEMPLATE_LIBRARY = [
     step1VisibleFields: {
       subtitle: false,
       logo: false,
+      headerImage: false,
       location: false,
       date: false,
       time: false,
@@ -147,6 +151,7 @@ export const TEMPLATE_LIBRARY = [
     step1VisibleFields: {
       subtitle: false,
       logo: false,
+      headerImage: false,
       location: false,
       date: false,
       time: false,
@@ -176,6 +181,7 @@ export const TEMPLATE_LIBRARY = [
     step1VisibleFields: {
       subtitle: false,
       logo: false,
+      headerImage: false,
       location: false,
       date: false,
       time: false,
