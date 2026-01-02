@@ -6,16 +6,19 @@ import { formApi } from "../../api/formApi";
 import { templateApi } from "../../api/templateApi";
 
 const FALLBACK_TEMPLATES = [
-  { 
+  {
     id: "tpl1", 
     title: "Workshop Registration", 
     description: "Collect attendee details for your upcoming workshop or seminar.", 
     category: "Events",
     fields: [
-      { label: 'Full Name', type: 'short_text' },
-      { label: 'Email Address', type: 'email' },
-      { label: 'Company/Organization', type: 'short_text' },
-      { label: 'Dietary Restrictions', type: 'long_text' }
+      { label: 'Full Name', type: 'short_text', required: true },
+      { label: 'Email Address', type: 'email', required: true },
+      { label: 'Phone Number', type: 'short_text', required: false },
+      { label: 'Company/Organization', type: 'short_text', required: false },
+      { label: 'Dietary Requirements', type: 'dropdown', options: ['None', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Other'], required: false },
+      { label: 'Preferred Session', type: 'radio', options: ['Morning Session', 'Afternoon Session'], required: true },
+      { label: 'Additional Comments', type: 'long_text', required: false }
     ]
   },
   { 
@@ -24,11 +27,14 @@ const FALLBACK_TEMPLATES = [
     description: "Standard job application form with resume upload section.", 
     category: "HR",
     fields: [
-      { label: 'Full Name', type: 'short_text' },
-      { label: 'Email', type: 'email' },
-      { label: 'Phone Number', type: 'number' },
-      { label: 'Resume/CV', type: 'file' },
-      { label: 'Cover Letter', type: 'long_text' }
+      { label: 'Full Name', type: 'short_text', required: true },
+      { label: 'Email Address', type: 'email', required: true },
+      { label: 'Phone Number', type: 'short_text', required: true },
+      { label: 'Position Applied For', type: 'short_text', required: true },
+      { label: 'Years of Experience', type: 'dropdown', options: ['0-1 years', '1-3 years', '3-5 years', '5-10 years', '10+ years'], required: true },
+      { label: 'Upload Resume', type: 'file', required: true },
+      { label: 'Cover Letter', type: 'long_text', required: false },
+      { label: 'Available Start Date', type: 'date', required: true }
     ]
   },
   { 
@@ -37,10 +43,13 @@ const FALLBACK_TEMPLATES = [
     description: "Gather insights from your customers about your product.", 
     category: "Feedback",
     fields: [
-      { label: 'Overall Satisfaction', type: 'rating' },
-      { label: 'What did you like most?', type: 'long_text' },
-      { label: 'What can we improve?', type: 'long_text' },
-      { label: 'Would you recommend us?', type: 'radio', options: ['Yes', 'No'] }
+      { label: 'Name', type: 'short_text', required: false },
+      { label: 'Email', type: 'email', required: true },
+      { label: 'Product/Service Used', type: 'short_text', required: true },
+      { label: 'Overall Rating', type: 'radio', options: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'], required: true },
+      { label: 'Would you recommend us?', type: 'radio', options: ['Yes', 'No', 'Maybe'], required: true },
+      { label: 'Your Feedback', type: 'long_text', required: true },
+      { label: 'Suggestions for Improvement', type: 'long_text', required: false }
     ]
   },
   { 
@@ -49,11 +58,15 @@ const FALLBACK_TEMPLATES = [
     description: "Comprehensive form for student admission inquiries.", 
     category: "Education",
     fields: [
-        { label: 'Full Name', type: 'short_text' },
-        { label: 'Date of Birth', type: 'date' },
-        { label: 'Email Address', type: 'email' },
-        { label: 'High School Transcript', type: 'file' },
-        { label: 'Essay', type: 'long_text' }
+      { label: 'First Name', type: 'short_text', required: true },
+      { label: 'Last Name', type: 'short_text', required: true },
+      { label: 'Email Address', type: 'email', required: true },
+      { label: 'Phone Number', type: 'short_text', required: true },
+      { label: 'Date of Birth', type: 'date', required: true },
+      { label: 'Program of Interest', type: 'dropdown', options: ['Computer Science', 'Engineering', 'Business Administration', 'Medicine', 'Arts', 'Other'], required: true },
+      { label: 'Current GPA', type: 'short_text', required: false },
+      { label: 'High School Name', type: 'short_text', required: true },
+      { label: 'Personal Statement', type: 'long_text', required: true }
     ]
   },
   { 
@@ -62,9 +75,12 @@ const FALLBACK_TEMPLATES = [
     description: "Simple RSVP form for parties, weddings, and corporate events.", 
     category: "Events",
     fields: [
-        { label: 'Full Name', type: 'short_text' },
-        { label: 'Will you be attending?', type: 'radio', options: ['Yes, I will attend', 'No, I cannot attend'] },
-        { label: 'Number of Guests', type: 'number' }
+      { label: 'Full Name', type: 'short_text', required: true },
+      { label: 'Email Address', type: 'email', required: true },
+      { label: 'Will you attend?', type: 'radio', options: ['Yes, I\'ll be there', 'No, I can\'t make it'], required: true },
+      { label: 'Number of Guests', type: 'number', required: false },
+      { label: 'Dietary Restrictions', type: 'dropdown', options: ['None', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Other'], required: false },
+      { label: 'Special Requests/Comments', type: 'long_text', required: false }
     ]
   },
   { 
@@ -73,9 +89,12 @@ const FALLBACK_TEMPLATES = [
     description: "Basic contact form for your website visitors.", 
     category: "General",
     fields: [
-        { label: 'Your Name', type: 'short_text' },
-        { label: 'Your Email', type: 'email' },
-        { label: 'Message', type: 'long_text' }
+      { label: 'Your Name', type: 'short_text', required: true },
+      { label: 'Email Address', type: 'email', required: true },
+      { label: 'Subject', type: 'short_text', required: true },
+      { label: 'Message', type: 'long_text', required: true },
+      { label: 'Preferred Contact Method', type: 'radio', options: ['Email', 'Phone'], required: false },
+      { label: 'Phone Number (optional)', type: 'short_text', required: false }
     ]
   },
   { 
@@ -84,8 +103,11 @@ const FALLBACK_TEMPLATES = [
     description: "Simple multi-choice survey template.", 
     category: "Survey",
     fields: [
-        { label: 'What is your favorite color?', type: 'radio', options: ['Red', 'Green', 'Blue'] },
-        { label: 'Which features are most important to you?', type: 'checkbox', options: ['Feature A', 'Feature B', 'Feature C'] }
+        { label: 'Your Name (Optional)', type: 'short_text', required: false },
+        { label: 'How did you hear about us?', type: 'radio', options: ['Social Media', 'Search Engine', 'Friend Referral', 'Advertisement', 'Other'], required: true },
+        { label: 'Which features interest you?', type: 'checkbox', options: ['Feature A', 'Feature B', 'Feature C', 'Feature D'], required: true },
+        { label: 'Rate your experience', type: 'rating', required: true },
+        { label: 'Any suggestions?', type: 'long_text', required: false }
     ]
   },
   {
@@ -94,9 +116,12 @@ const FALLBACK_TEMPLATES = [
     description: "Product order form with customer and product details.",
     category: "Product",
     fields: [
-      { label: 'Product Name', type: 'short_text' },
-      { label: 'Quantity', type: 'number' },
-      { label: 'Shipping Address', type: 'long_text' }
+      { label: 'Customer Name', type: 'short_text', required: true },
+      { label: 'Email', type: 'email', required: true },
+      { label: 'Product Name', type: 'short_text', required: true },
+      { label: 'Product Category', type: 'short_text', required: true },
+      { label: 'Quantity', type: 'number', required: true },
+      { label: 'Price', type: 'short_text', required: true }
     ]
   },
   {
@@ -105,9 +130,10 @@ const FALLBACK_TEMPLATES = [
     description: "Collect course enrollment details from students.",
     category: "Education",
     fields: [
-      { label: 'Student Name', type: 'short_text' },
-      { label: 'Course', type: 'dropdown', options: ['Math', 'Science', 'History'] },
-      { label: 'Student ID', type: 'number' }
+      { label: 'Course Name', type: 'short_text', required: true },
+      { label: 'Student Name', type: 'short_text', required: true },
+      { label: 'Email', type: 'email', required: true },
+      { label: 'Mode', type: 'dropdown', options: ['Online', 'Offline', 'Hybrid'], required: true }
     ]
   },
   {
@@ -116,9 +142,13 @@ const FALLBACK_TEMPLATES = [
     description: "Capture trip package details and traveler info.",
     category: "Travel",
     fields: [
-      { label: 'Destination', type: 'short_text' },
-      { label: 'Travel Dates', type: 'date' },
-      { label: 'Number of Travelers', type: 'number' }
+      { label: 'Name', type: 'short_text', required: true },
+      { label: 'Email', type: 'email', required: true },
+      { label: 'Package Type', type: 'dropdown', options: ['Standard', 'Deluxe', 'Premium', 'Custom'], required: true },
+      { label: 'Travel Date', type: 'date', required: true },
+      { label: 'Traveler Name', type: 'short_text', required: true },
+      { label: 'Destination', type: 'short_text', required: true },
+      { label: 'Number of Travelers', type: 'number', required: true }
     ]
   },
   {
@@ -127,9 +157,11 @@ const FALLBACK_TEMPLATES = [
     description: "Book appointments with preferred service and time slot.",
     category: "Appointment",
     fields: [
-      { label: 'Service', type: 'dropdown', options: ['Service A', 'Service B'] },
-      { label: 'Preferred Date', type: 'date' },
-      { label: 'Preferred Time', type: 'time' }
+      { label: 'Name', type: 'short_text', required: true },
+      { label: 'Phone', type: 'short_text', required: true },
+      { label: 'Service Type', type: 'dropdown', options: ['Consultation', 'Follow-up', 'Therapy', 'Support', 'Other'], required: true },
+      { label: 'Appointment Date', type: 'date', required: true },
+      { label: 'Time Slot', type: 'short_text', required: true }
     ]
   }
 ];

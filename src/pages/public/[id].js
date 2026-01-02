@@ -39,7 +39,7 @@ export default function PublicFormPage(){
 
   // Landing page view (event details)
   if(!showForm && !submitted) {
-    // Build info cards from top-level fields, or fall back to matching customDetails
+    // ... (logic for info cards, etc. remains the same)
     const usedCustomIndexes = new Set();
     const findCustomDetail = (matchFn) => {
       if (!Array.isArray(form.customDetails)) return null;
@@ -55,14 +55,11 @@ export default function PublicFormPage(){
     };
 
     const initialInfoCards = [];
-    const getLabel = (fieldKey, defaultLabel) => {
-      return form.step1Labels?.[fieldKey] || defaultLabel;
-    }
+    const getLabel = (fieldKey, defaultLabel) => form.step1Labels?.[fieldKey] || defaultLabel;
 
     const dateDetail = form.date ? { value: form.date, label: getLabel('date', 'Date') } : findCustomDetail((label) => /date/i.test(label));
     if (dateDetail) initialInfoCards.push({ label: dateDetail.label, value: dateDetail.value, icon: '📅' });
 
-    // Find start/end times by user-provided labels; fall back to generic time
     const startDetail = form.startTime ? { value: form.startTime, label: getLabel('startTime', 'Start Time') } : findCustomDetail((label) => /start time|start|begin/i.test(label));
     const endDetail = form.endTime ? { value: form.endTime, label: getLabel('endTime', 'End Time') } : findCustomDetail((label) => /end time|end|finish|closing/i.test(label));
     if (!startDetail && !endDetail) {
@@ -88,7 +85,6 @@ export default function PublicFormPage(){
     const deadlineDetail = form.deadline ? { value: form.deadline, label: getLabel('deadline', 'Application Deadline') } : findCustomDetail((label) => /deadline/i.test(label));
     if (deadlineDetail) initialInfoCards.push({ label: deadlineDetail.label, value: deadlineDetail.value, icon: '⏳' });
 
-    // Match organizer name/email/phone with more specific rules so we don't pick an email for the name
     const organizerNameDetail = form.organizerName ? { value: form.organizerName, label: getLabel('organizerName', 'Organizer') } : findCustomDetail((label) => {
       const l = String(label).toLowerCase();
       if (/organizer name|organiser name|organizername|organisername/.test(l)) return true;
@@ -105,20 +101,16 @@ export default function PublicFormPage(){
     const organizerPhoneDetail = form.organizerPhone ? { value: form.organizerPhone, label: organizerPhoneLabel } : findCustomDetail((label) => /organizer phone|phone|mobile|contact phone|phone number|tel|telephone/i.test(String(label).toLowerCase()));
     if (organizerPhoneDetail) initialInfoCards.push({ label: organizerPhoneDetail.label || organizerPhoneLabel, value: organizerPhoneDetail.value, icon: '📞' });
 
-    // expose simple value variables for later blocks (contact box, etc.)
     const organizerNameVal = organizerNameDetail ? organizerNameDetail.value : (form.organizerName || null);
     const organizerEmailVal = organizerEmailDetail ? organizerEmailDetail.value : (form.organizerEmail || null);
     const organizerPhoneVal = organizerPhoneDetail ? organizerPhoneDetail.value : (form.organizerPhone || null);
 
-    // Deduplicate infoCards (label+value) and make sure any matched customDetails indexes
-    // are recorded in usedCustomIndexes so they are excluded from Key Information.
     const uniqueMap = new Set();
     const infoCards = [];
     for (const card of initialInfoCards) {
       const key = `${String(card.label).toLowerCase().trim()}|${String(card.value).trim()}`;
       if (uniqueMap.has(key)) continue;
       uniqueMap.add(key);
-      // mark any customDetails entries that match this card's value (to exclude later)
       if (Array.isArray(form.customDetails)) {
         for (let i = 0; i < form.customDetails.length; i++) {
           const d = form.customDetails[i];
@@ -133,157 +125,84 @@ export default function PublicFormPage(){
       infoCards.push(card);
     }
 
-    // Build remaining custom details excluding those we pulled out
-    const remainingCustomDetails = Array.isArray(form.customDetails)
-      ? form.customDetails.filter((_, idx) => !usedCustomIndexes.has(idx))
-      : [];
+    const remainingCustomDetails = Array.isArray(form.customDetails) ? form.customDetails.filter((_, idx) => !usedCustomIndexes.has(idx)) : [];
 
     return (
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-5xl mx-auto">
-          {/* Hero */}
-          <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+        <main className="min-h-screen bg-slate-50 font-sans">
+          <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+            {/* Header Image */}
             {form.headerImage && (
-              <div className="w-full h-64">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src={getImageUrl(form.headerImage)} 
-                  alt="Header Image" 
-                  className="w-full h-full object-cover"
-                />
+              <div className="rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl mb-8">
+                <img src={getImageUrl(form.headerImage)} alt="Header" className="w-full h-auto max-h-96 object-cover" />
               </div>
             )}
-            {/* Header with gradient */}
-            <div className="relative bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 px-6 sm:px-10 py-10 sm:py-14">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
-              <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
-                <div className="flex-1 space-y-3">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-semibold">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-lg shadow-emerald-400/50" />
-                    Open for Registration
-                  </div>
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                    {form.title}
-                  </h1>
-                  {form.subtitle && (
-                    <p className="text-lg sm:text-xl text-indigo-50 font-medium">
-                      {form.subtitle}
-                    </p>
-                  )}
-                </div>
-
+  
+            {/* Content Container */}
+            <div className="bg-white rounded-2xl md:rounded-3xl shadow-2xl p-8 md:p-12">
+              <div className="text-center">
+                {/* Logo */}
                 {form.logo && (
-                  <div className="flex-shrink-0">
-                    <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl bg-white shadow-2xl flex items-center justify-center overflow-hidden border-4 border-white/50">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img 
-                        src={getImageUrl(form.logo)} 
-                        alt="Logo" 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    </div>
+                  <div className="mb-6">
+                    <img src={getImageUrl(form.logo)} alt="Logo" className="w-20 h-20 md:w-24 md:h-24 rounded-full mx-auto shadow-lg border-4 border-white" />
                   </div>
                 )}
+  
+                {/* Title and Subtitle */}
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-800 tracking-tight">{form.title}</h1>
+                {form.subtitle && <p className="mt-3 text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto">{form.subtitle}</p>}
               </div>
-            </div>
-
-            {/* Content */}
-            <div className="px-6 sm:px-10 py-8 sm:py-10 space-y-8">
+  
+              {/* Divider */}
+              {(form.description || infoCards.length > 0) && <hr className="my-8 md:my-12 border-slate-200" />}
+  
               {/* Description */}
               {form.description && (
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-600" />
-                    About This Event
-                  </h2>
-                  <p className="text-base text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                    {form.description}
-                  </p>
+                <div className="mb-8 max-w-none text-slate-600">
+                  <h2 className="text-xl font-bold text-slate-700 mb-3 text-center">About</h2>
+                  <p className="whitespace-pre-wrap text-lg leading-relaxed">{form.description}</p>
                 </div>
               )}
-
+  
               {/* Info Cards */}
               {infoCards.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {infoCards.map((card, idx) => (
-                    <div
-                      key={idx}
-                      className="group relative bg-gradient-to-br from-white to-slate-50 rounded-2xl border-2 border-slate-200 p-5 hover:border-indigo-300 hover:shadow-lg transition-all duration-300"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="h-12 w-12 rounded-xl bg-indigo-100 flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">
+                <div className="mb-8">
+                   <h2 className="text-xl font-bold text-slate-700 mb-4">Details</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {infoCards.map((card, idx) => (
+                      <div key={idx} className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-5 flex items-start gap-4">
+                        <div className="h-12 w-12 rounded-lg bg-indigo-100 flex items-center justify-center text-2xl text-indigo-500 flex-shrink-0">
                           {card.icon}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-1">
-                            {card.label}
-                          </p>
-                          <p className="text-lg font-bold text-slate-900 break-words">
-                            {card.value}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {remainingCustomDetails.length > 0 && (
-                <div className="bg-gradient-to-br from-indigo-50 to-white rounded-2xl border-2 border-indigo-200 p-6">
-                  <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-600" />
-                    Key Information
-                  </h3>
-                  <div className="space-y-3">
-                    {remainingCustomDetails.map((detail, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-start justify-between gap-4 py-3 border-b border-indigo-100 last:border-0"
-                      >
-                        <div className="flex items-center gap-2 text-slate-900 font-semibold">
-                          <span className="h-2 w-2 rounded-full bg-indigo-500" />
-                          <span>{detail.label || 'Detail'}</span>
-                        </div>
-                        <div className="text-slate-700 text-sm text-right break-words max-w-xs font-medium">
-                          {detail.value || '—'}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-slate-500">{card.label}</p>
+                          <p className="text-base font-bold text-slate-800 break-words">{card.value}</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-
-              {(organizerEmailVal || organizerPhoneVal) && (
-                <div className="rounded-2xl border border-indigo-500/40 bg-indigo-500/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">Questions? We can help.</p>
-                    <p className="text-sm text-slate-700">Reach out and we'll respond promptly.</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2 text-sm">
-                    {organizerEmailVal && (
-                      <a href={`mailto:${organizerEmailVal}`} className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 border border-white/15 text-slate-900 hover:bg-white/15 transition">
-                        <span className="text-xs font-semibold">Email</span>
-                        <span className="font-semibold">{organizerEmailVal}</span>
-                      </a>
-                    )}
-                    {organizerPhoneVal && (
-                      <span className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 border border-white/15 text-slate-900">
-                        <span className="text-xs font-semibold">Phone</span>
-                        <span className="font-semibold">{organizerPhoneVal}</span>
-                      </span>
-                    )}
-                  </div>
-                </div>
+  
+              {/* Remaining Custom Details */}
+              {remainingCustomDetails.length > 0 && (
+                 <div className="mb-8">
+                    <h2 className="text-xl font-bold text-slate-700 mb-4">Additional Information</h2>
+                    <div className="border border-slate-200 rounded-xl">
+                      {remainingCustomDetails.map((detail, idx) => (
+                        <div key={idx} className={`flex items-center justify-between p-4 ${idx > 0 ? 'border-t border-slate-200' : ''}`}>
+                          <span className="font-semibold text-slate-600">{detail.label || 'Detail'}</span>
+                          <span className="text-slate-500 text-right">{detail.value || '—'}</span>
+                        </div>
+                      ))}
+                    </div>
+                 </div>
               )}
-
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="text-sm text-slate-400 flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                  Limited seats · Secure your spot now
-                </div>
+  
+              {/* Action Button */}
+              <div className="mt-10 text-center">
                 <button
                   onClick={() => setShowForm(true)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold shadow-lg shadow-indigo-900/50 hover:translate-y-px transition"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-indigo-600 text-white font-semibold shadow-lg hover:bg-indigo-700 hover:-translate-y-0.5 transition-all transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   Register / Participate
                   <span aria-hidden>→</span>
@@ -291,45 +210,39 @@ export default function PublicFormPage(){
               </div>
             </div>
           </div>
-        </div>
-      </main>
-    );
+        </main>
+      );
   }
 
   // Form submission view
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 p-6">
+     <main className="min-h-screen bg-slate-100 p-6">
       <div className="max-w-3xl mx-auto">
         {submitted ? (
-          <div className="bg-white rounded-3xl shadow-2xl border border-indigo-100 p-12 mt-12">
-            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+          <div className="bg-white rounded-3xl shadow-2xl p-12 mt-12 text-center">
+             <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-12 h-12 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             </div>
-            <h2 className="text-3xl font-bold text-slate-900 mb-4 text-center">Thank You!</h2>
-            <p className="text-slate-700 text-center mb-8">Your response has been recorded.</p>
-            <div className="text-center space-y-3">
-              <button
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Thank You!</h2>
+            <p className="text-slate-600 mb-8">Your response has been recorded.</p>
+            <div className="space-y-4">
+               <button
                 onClick={() => {
-                  // Open a fresh form instance without navigating away
                   setSubmitted(false);
                   setShowForm(true);
                   setFormInstanceKey(k => k + 1);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="text-indigo-600 hover:text-indigo-800 font-medium underline text-sm"
+                className="text-indigo-600 hover:underline font-medium"
               >
                 Submit another response
               </button>
               <div>
                 <button
-                  onClick={() => {
-                    setSubmitted(false);
-                    setShowForm(false);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className="text-sm font-medium text-slate-600 hover:text-slate-800 underline"
+                  onClick={() => { setSubmitted(false); setShowForm(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                  className="text-sm text-slate-500 hover:underline"
                 >
                   ← Back to landing page
                 </button>
@@ -337,16 +250,16 @@ export default function PublicFormPage(){
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-3xl shadow-2xl border border-indigo-100 p-8 md:p-10">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-10">
             <button
               onClick={() => setShowForm(false)}
-              className="mb-6 inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 text-sm font-semibold transition-colors"
+              className="mb-6 inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-semibold"
             >
-              ← Back to Event Details
+              ← Back to Details
             </button>
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-slate-900 mb-2">{form.title}</h2>
-              <p className="text-slate-600">Registration Form</p>
+            <div className="mb-8 text-center">
+              <h2 className="text-3xl font-bold text-slate-800">{form.title}</h2>
+              <p className="text-slate-500 mt-1">Please fill out the form below.</p>
             </div>
             <FormRenderer key={formInstanceKey} form={form} onSubmit={handleSubmit} />
           </div>

@@ -117,12 +117,12 @@ const FALLBACK_TEMPLATES = [
     description: "Product order form with customer and product details.",
     category: "Product",
     fields: [
-      { _id: "pf1", type: "short_text", label: "Product Name", required: true, placeholder: "Enter product name", order: 0 },
-      { _id: "pf2", type: "short_text", label: "Product Category", required: true, placeholder: "Enter product category", order: 1 },
-      { _id: "pf3", type: "number", label: "Quantity", required: true, placeholder: "1", order: 2 },
-      { _id: "pf4", type: "short_text", label: "Price", required: true, placeholder: "$0.00", order: 3 },
-      { _id: "pf5", type: "short_text", label: "Customer Name", required: true, placeholder: "Enter customer name", order: 4 },
-      { _id: "pf6", type: "email", label: "Email", required: true, placeholder: "customer@example.com", order: 5 }
+      { _id: "pf1", type: "short_text", label: "Customer Name", required: true, placeholder: "Enter customer name", order: 0 },
+      { _id: "pf2", type: "email", label: "Email", required: true, placeholder: "customer@example.com", order: 1 },
+      { _id: "pf3", type: "short_text", label: "Product Name", required: true, placeholder: "Enter product name", order: 2 },
+      { _id: "pf4", type: "short_text", label: "Product Category", required: true, placeholder: "Enter product category", order: 3 },
+      { _id: "pf5", type: "number", label: "Quantity", required: true, placeholder: "1", order: 4 },
+      { _id: "pf6", type: "short_text", label: "Price", required: true, placeholder: "$0.00", order: 5 }
     ]
   },
   {
@@ -143,12 +143,13 @@ const FALLBACK_TEMPLATES = [
     description: "Capture trip package details and traveler info.",
     category: "Travel",
     fields: [
-      { _id: "tp1", type: "short_text", label: "Destination", required: true, placeholder: "Enter destination", order: 0 },
-      { _id: "tp2", type: "dropdown", label: "Package Type", required: true, options: ["Standard", "Deluxe", "Premium", "Custom"], order: 1 },
-      { _id: "tp3", type: "date", label: "Travel Date", required: true, placeholder: "Select date", order: 2 },
-      { _id: "tp4", type: "number", label: "Travelers", required: true, placeholder: "1", order: 3 },
-      { _id: "tp5", type: "short_text", label: "Name", required: true, placeholder: "Enter primary traveler name", order: 4 },
-      { _id: "tp6", type: "email", label: "Email", required: true, placeholder: "traveler@example.com", order: 5 }
+      { _id: "tp1", type: "short_text", label: "Name", required: true, placeholder: "Enter your name", order: 0 },
+      { _id: "tp2", type: "email", label: "Email", required: true, placeholder: "your.email@example.com", order: 1 },
+      { _id: "tp3", type: "dropdown", label: "Package Type", required: true, options: ["Standard", "Deluxe", "Premium", "Custom"], order: 2 },
+      { _id: "tp4", type: "date", label: "Travel Date", required: true, placeholder: "Select date", order: 3 },
+      { _id: "tp5", type: "short_text", label: "Traveler Name", required: true, placeholder: "Enter primary traveler name", order: 4 },
+      { _id: "tp6", type: "short_text", label: "Destination", required: true, placeholder: "Enter destination", order: 5 },
+      { _id: "tp7", type: "number", label: "Number of Travelers", required: true, placeholder: "1", order: 6 }
     ]
   },
   {
@@ -157,11 +158,11 @@ const FALLBACK_TEMPLATES = [
     description: "Book appointments with preferred service and time slot.",
     category: "Appointment",
     fields: [
-      { _id: "ab1", type: "dropdown", label: "Service Type", required: true, options: ["Consultation", "Follow-up", "Therapy", "Support", "Other"], order: 0 },
-      { _id: "ab2", type: "date", label: "Appointment Date", required: true, placeholder: "Select date", order: 1 },
-      { _id: "ab3", type: "short_text", label: "Time Slot", required: true, placeholder: "e.g., 2:00 PM - 3:00 PM", order: 2 },
-      { _id: "ab4", type: "short_text", label: "Name", required: true, placeholder: "Enter your name", order: 3 },
-      { _id: "ab5", type: "short_text", label: "Phone", required: true, placeholder: "+1 (555) 123-4567", order: 4 }
+      { _id: "ab1", type: "short_text", label: "Name", required: true, placeholder: "Enter your name", order: 0 },
+      { _id: "ab2", type: "short_text", label: "Phone", required: true, placeholder: "+1 (555) 123-4567", order: 1 },
+      { _id: "ab3", type: "dropdown", label: "Service Type", required: true, options: ["Consultation", "Follow-up", "Therapy", "Support", "Other"], order: 2 },
+      { _id: "ab4", type: "date", label: "Appointment Date", required: true, placeholder: "Select date", order: 3 },
+      { _id: "ab5", type: "short_text", label: "Time Slot", required: true, placeholder: "e.g., 2:00 PM - 3:00 PM", order: 4 }
     ]
   },
 ];
