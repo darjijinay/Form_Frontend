@@ -4,10 +4,23 @@ import TemplateModal from '../../components/templates/TemplateModal';
 import { useRouter } from 'next/router';
 import { formApi } from "../../api/formApi";
 import { templateApi } from "../../api/templateApi";
-import { TEMPLATE_LIBRARY } from "../../data/templates";
+
+const FALLBACK_TEMPLATES = [
+  { id: "tpl1", title: "Workshop Registration", description: "Collect attendee details for your upcoming workshop or seminar.", category: "Events" },
+  { id: "tpl2", title: "Job Application", description: "Standard job application form with resume upload section.", category: "HR" },
+  { id: "tpl3", title: "Customer Feedback", description: "Gather insights from your customers about your product.", category: "Feedback" },
+  { id: "tpl4", title: "College Admission", description: "Comprehensive form for student admission inquiries.", category: "Education" },
+  { id: "tpl5", title: "Event RSVP", description: "Simple RSVP form for parties, weddings, and corporate events.", category: "Events" },
+  { id: "tpl6", title: "Contact Us", description: "Basic contact form for your website visitors.", category: "General" },
+  { id: "tpl7", title: "Quick Survey", description: "Simple multi-choice survey template.", category: "Survey" },
+  { id: "tpl8", title: "Product Template", description: "Product order form with customer and product details.", category: "Product" },
+  { id: "tpl9", title: "Course Template", description: "Collect course enrollment details from students.", category: "Education" },
+  { id: "tpl10", title: "Trip Package Template", description: "Capture trip package details and traveler info.", category: "Travel" },
+  { id: "tpl11", title: "Appointment Booking Template", description: "Book appointments with preferred service and time slot.", category: "Appointment" },
+];
 
 export default function TemplatesPage() {
-  const [templates, setTemplates] = useState(TEMPLATE_LIBRARY);
+  const [templates, setTemplates] = useState(FALLBACK_TEMPLATES);
   const [loading, setLoading] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [creatingFromTemplate, setCreatingFromTemplate] = useState(false);
