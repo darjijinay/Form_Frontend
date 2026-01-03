@@ -1,47 +1,54 @@
 "use client";
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import AppLayout from '../../../../components/layout/AppLayout';
 import { formApi } from '../../../../api/formApi';
+import { useDebounce } from '../../../../hooks/useDebounce';
 
 export default function FormResponsesPage() {
   const router = useRouter();
   const { formId } = router.query;
   const [form, setForm] = useState(null);
   const [responses, setResponses] = useState([]);
+  const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  useEffect(() => {
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 500);
+
+  const loadData = useCallback(async () => {
     if (!formId) return;
-
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        const [formRes, responsesRes] = await Promise.all([
-          formApi.getForm(formId),
-          formApi.getResponses(formId),
-        ]);
+    setLoading(true);
+    try {
+      // Form info is fetched once
+      if (!form) {
+        const formRes = await formApi.getForm(formId);
         setForm(formRes.data);
-
-        // `responsesRes.data` may be an array OR an object like { form, responses }
-        const resData = responsesRes.data;
-        let list = [];
-        if (Array.isArray(resData)) list = resData;
-        else if (resData && Array.isArray(resData.responses)) list = resData.responses;
-        else list = [];
-
-        setResponses(list);
-      } catch (error) {
-        console.error('Error loading responses:', error);
-        setResponses([]);
-      } finally {
-        setLoading(false);
       }
-    };
+      
+      const params = { page, limit: 10, sortBy, sortOrder, search: debouncedSearch };
+      const responsesRes = await formApi.getResponses(formId, params);
+      
+      const resData = responsesRes.data;
+      setResponses(resData.responses || []);
+      setPagination(resData.pagination || null);
 
+    } catch (error) {
+      console.error('Error loading responses:', error);
+      setResponses([]);
+      setPagination(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [formId, page, sortBy, sortOrder, debouncedSearch, form]);
+
+  useEffect(() => {
     loadData();
-  }, [formId]);
+  }, [loadData]);
 
   const handleExportCSV = async () => {
     if (!formId) return;
@@ -64,50 +71,28 @@ export default function FormResponsesPage() {
     }
   };
 
-  const getFieldLabel = (fieldId) => {
-    return form?.fields?.find(f => f._id === fieldId)?.label || fieldId;
+  const handleSort = (fieldId) => {
+    const newSortOrder = sortBy === fieldId && sortOrder === 'desc' ? 'asc' : 'desc';
+    setSortBy(fieldId);
+    setSortOrder(newSortOrder);
+    setPage(1);
   };
-
+  
   const getFieldType = (fieldId) => {
     return form?.fields?.find(f => f._id === fieldId)?.type;
   };
 
   const summarizeValue = (fieldType, answer) => {
     if (answer === undefined || answer === null) return '-';
-
-    // Arrays
     if (Array.isArray(answer)) return answer.length ? answer.join(', ') : '-';
-
-    // Matrix (object of coordinates)
     if (fieldType === 'matrix' && typeof answer === 'object') {
       const entries = Object.entries(answer || {});
       if (!entries.length) return '-';
-      return entries
-        .filter(([, v]) => v)
-        .map(([k]) => k)
-        .join(', ');
+      return entries.filter(([, v]) => v).map(([k]) => k).join(', ');
     }
-
-    // File upload
-    if (fieldType === 'file' && typeof answer === 'string') {
-      const fileName = answer.split('/').pop();
-      return fileName || answer;
-    }
-
-    // Signature (data URL)
-    if (fieldType === 'signature' && typeof answer === 'string') {
-      return 'Signature captured';
-    }
-
-    // Image choice stores option id or label
-    if (fieldType === 'image_choice') {
-      if (typeof answer === 'string') return answer;
-      return typeof answer === 'object' ? JSON.stringify(answer) : String(answer);
-    }
-
-    // Objects fallback
+    if (fieldType === 'file' && typeof answer === 'string') return answer.split('/').pop() || answer;
+    if (fieldType === 'signature' && typeof answer === 'string') return 'Signature captured';
     if (typeof answer === 'object') return JSON.stringify(answer);
-
     return answer || '-';
   };
 
@@ -119,62 +104,75 @@ export default function FormResponsesPage() {
     return summarizeValue(fieldType, answer.value);
   };
 
-  if (loading) {
+  const renderPagination = () => {
+    if (!pagination || pagination.total <= pagination.limit) return null;
+    const { page, totalPages, limit, total } = pagination;
+    const start = (page - 1) * limit + 1;
+    const end = Math.min(page * limit, total);
     return (
-      <AppLayout>
-        <div className="flex items-center justify-center min-h-96">
-          <div className="text-center">
-            <div className="inline-block animate-spin h-8 w-8 border-4 border-slate-300 border-t-indigo-500 rounded-full mb-4"></div>
-            <p className="text-slate-600">Loading responses...</p>
-          </div>
+      <div className="flex items-center justify-between">
+        <p className="text-sm">Showing {start} to {end} of {total} responses</p>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setPage(p => p - 1)} disabled={page === 1} className="px-3 py-1 rounded-md border bg-white disabled:opacity-50">Previous</button>
+          <span className="text-sm">Page {page} of {totalPages}</span>
+          <button onClick={() => setPage(p => p + 1)} disabled={page === totalPages} className="px-3 py-1 rounded-md border bg-white disabled:opacity-50">Next</button>
         </div>
-      </AppLayout>
+      </div>
     );
-  }
+  };
+
+  const SortableHeader = ({ label, fieldId }) => {
+    const isSorted = sortBy === fieldId;
+    return (
+      <th 
+        className="px-6 py-4 text-left font-semibold text-[var(--text)] cursor-pointer hover:bg-slate-100"
+        onClick={() => handleSort(fieldId)}
+      >
+        <div className="flex items-center gap-2">
+          <span>{label}</span>
+          {isSorted && (
+            <span className="text-indigo-500">{sortOrder === 'desc' ? '↓' : '↑'}</span>
+          )}
+        </div>
+      </th>
+    );
+  };
 
   return (
     <AppLayout>
       <div className="space-y-6 animate-fadeIn">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-[var(--text)] mb-2">
-              Form Responses
-            </h1>
-            <p className="text-slate-600">
-              {form?.title} • {responses.length} submission{responses.length !== 1 ? 's' : ''}
-            </p>
+            <h1 className="text-3xl font-bold text-[var(--text)] mb-2">Form Responses</h1>
+            <p className="text-slate-600">{form?.title} • {pagination?.total || 0} submission{pagination?.total !== 1 ? 's' : ''}</p>
           </div>
-          <button
-            onClick={handleExportCSV}
-            disabled={exporting || responses.length === 0}
-            className="px-4 py-2 rounded-xl bg-indigo-500 text-white font-medium hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
-          >
-            {exporting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Exporting...
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Export to CSV
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <input 
+              type="text"
+              placeholder="Search responses..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="px-4 py-2 rounded-xl border border-slate-300 w-full sm:w-64"
+            />
+            <button
+              onClick={handleExportCSV}
+              disabled={exporting || responses.length === 0}
+              className="px-4 py-2 rounded-xl bg-indigo-500 text-white font-medium hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 flex-shrink-0"
+            >
+              {exporting ? 'Exporting...' : 'Export to CSV'}
+            </button>
+          </div>
         </div>
 
-        {responses.length === 0 ? (
+        {loading && responses.length === 0 ? (
+           <div className="text-center p-12"><p className="text-slate-600">Loading responses...</p></div>
+        ) : !loading && responses.length === 0 ? (
           <div className="bg-white shadow-sm border border-slate-200 rounded-2xl p-12 text-center">
-            <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-slate-700 mb-2">No responses yet</h3>
+            <h3 className="text-lg font-medium text-slate-700 mb-2">
+              {debouncedSearch ? 'No matching responses' : 'No responses yet'}
+            </h3>
             <p className="text-sm text-slate-600">
-              Responses will appear here when users submit your form
+              {debouncedSearch ? 'Try a different search term.' : 'Responses will appear here when users submit your form'}
             </p>
           </div>
         ) : (
@@ -183,7 +181,7 @@ export default function FormResponsesPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50">
-                    <th className="px-6 py-4 text-left font-semibold text-[var(--text)]">Submitted</th>
+                    <SortableHeader label="Submitted" fieldId="createdAt" />
                     {form?.fields?.slice(0, 5).map(field => (
                       <th key={field._id} className="px-6 py-4 text-left font-semibold text-[var(--text)]">
                         {field.label}
@@ -224,7 +222,7 @@ export default function FormResponsesPage() {
             </div>
 
             <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 text-sm text-slate-600">
-              Showing {responses.length} response{responses.length !== 1 ? 's' : ''}
+              {renderPagination()}
             </div>
           </div>
         )}

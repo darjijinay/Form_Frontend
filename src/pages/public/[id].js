@@ -116,7 +116,7 @@ export default function PublicFormPage(){
           const d = form.customDetails[i];
           if (!d) continue;
           try {
-            if (String(d.value).trim() === String(card.value).trim() || String(d.label).toLowerCase().trim() === String(card.label).toLowerCase().trim()) {
+            if (String(d.label).toLowerCase().trim() === String(card.label).toLowerCase().trim()) {
               usedCustomIndexes.add(i);
             }
           } catch (e) {}
@@ -186,7 +186,7 @@ export default function PublicFormPage(){
               {/* Remaining Custom Details */}
               {remainingCustomDetails.length > 0 && (
                  <div className="mb-8">
-                    <h2 className="text-xl font-bold text-slate-700 mb-4">Additional Information</h2>
+                    <h2 className="text-xl font-bold text-slate-700 mb-4">Key Information</h2>
                     <div className="border border-slate-200 rounded-xl">
                       {remainingCustomDetails.map((detail, idx) => (
                         <div key={idx} className={`flex items-center justify-between p-4 ${idx > 0 ? 'border-t border-slate-200' : ''}`}>

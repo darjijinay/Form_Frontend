@@ -343,7 +343,6 @@ export default function Home() {
               <ul className="space-y-3">
                 <li><a href="#features" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Features</a></li>
                 <li><a href="#templates" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Templates</a></li>
-                <li><a href="#" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Integrations</a></li>
                 <li><a href="#pricing" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Pricing</a></li>
               </ul>
             </div>

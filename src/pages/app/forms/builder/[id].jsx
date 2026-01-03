@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import AppLayout from '../../../../components/layout/AppLayout';
 import FormBuilder from '../../../../components/builder/FormBuilder';
 import PreviewPanel from '../../../../components/builder/PreviewPanel';
-import GoogleSheetsIntegration from '../../../../components/forms/GoogleSheetsIntegration';
 import Step1FormDetails from '../../../../components/builder/Step1FormDetails';
 import { useEffect, useState, useRef } from 'react';
 import QRCode from 'qrcode';
@@ -54,7 +53,6 @@ export default function FormBuilderPage() {
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState({});
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [isSheetsModalOpen, setIsSheetsModalOpen] = useState(false);
   const statusTimer = useRef(null);
   const isMounted = useRef(false);
 
@@ -118,7 +116,7 @@ export default function FormBuilderPage() {
     };
 
     load();
-  }, [id]);
+  }, [id, router.query]);
 
   // mark mounted
   useEffect(() => {
@@ -144,19 +142,6 @@ export default function FormBuilderPage() {
       }
       setStatus('Form saved');
       // clear previous timer
-                  <button
-                    onClick={() => setForm({
-                      ...form,
-                      customDetails: [
-                        { label: 'Speaker Name', value: '', type: 'Short Text' },
-                        { label: 'Duration', value: '', type: 'Short Text' },
-                        { label: 'Eligibility', value: '', type: 'Short Text' },
-                      ],
-                    })}
-                    className="px-3 py-2 rounded-full border bg-slate-50 hover:bg-slate-100"
-                  >
-                    Reset to defaults
-                  </button>
       if (statusTimer.current) clearTimeout(statusTimer.current);
       statusTimer.current = setTimeout(() => setStatus(''), 2000);
     } catch (error) {
@@ -375,40 +360,7 @@ export default function FormBuilderPage() {
                 </div>
               </div>
 
-              {form._id ? (
-                <div className="space-y-4 mt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold">Integrations</h3>
-                      <p className="text-sm text-slate-600">Connect automations that run after each submission.</p>
-                    </div>
-                    <div className="text-xs text-slate-500">Triggers: Google Sheets</div>
-                  </div>
 
-                  <div className="grid gap-4 md:grid-cols-1">
-                    <div className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-semibold text-slate-900">Google Sheets</h4>
-                          <p className="text-sm text-slate-600">Append responses, with token refresh & header row.</p>
-                        </div>
-                      </div>
-                      <div className="mt-4 flex justify-end">
-                        <button
-                          onClick={() => setIsSheetsModalOpen(true)}
-                          className="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-500"
-                        >
-                          Manage Sheets
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-amber-50 border border-amber-200 text-amber-800 text-sm p-4 rounded mt-6">
-                  Save the form first to configure integrations.
-                </div>
-              )}
 
               <div className="bg-slate-50 p-4 rounded mt-6">
                 <div className="flex items-center justify-between">
@@ -459,17 +411,6 @@ export default function FormBuilderPage() {
           )}
         </div>
       </div>
-
-      {/* Integration Modals */}
-      {form?._id && (
-        <>
-          <GoogleSheetsIntegration
-            formId={form._id}
-            isOpen={isSheetsModalOpen}
-            onClose={() => setIsSheetsModalOpen(false)}
-          />
-        </>
-      )}
 
       {/* Preview Panel */}
       <PreviewPanel
