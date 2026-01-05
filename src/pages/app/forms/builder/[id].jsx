@@ -358,6 +358,45 @@ export default function FormBuilderPage() {
                   </label>
                   <p className="text-sm text-slate-500 mt-2">When published, anyone with the link can view and submit this form.</p>
                 </div>
+
+                {/* Pagination Settings */}
+                <div className="space-y-3 border rounded-lg p-4 bg-slate-50">
+                  <h3 className="font-semibold text-sm">Form Pagination</h3>
+                  <div>
+                    <label className="text-xs font-medium text-slate-700 block mb-1">Questions per page</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={form.settings?.questionsPerPage || 0}
+                      onChange={async (e) => {
+                        const newForm = {...form};
+                        newForm.settings = {...form.settings, questionsPerPage: parseInt(e.target.value) || 0};
+                        setForm(newForm);
+                        
+                        // Auto-save immediately
+                        try {
+                          setSaving(true);
+                          const { data } = await formApi.updateForm(form._id, newForm);
+                          setForm(data);
+                          setStatus('✓ Pagination settings saved');
+                          setTimeout(() => setStatus(''), 2000);
+                        } catch (error) {
+                          console.error('Error saving settings:', error);
+                          setStatus('Error saving');
+                        } finally {
+                          setSaving(false);
+                        }
+                      }}
+                      placeholder="0"
+                      className="w-full px-3 py-2 border rounded text-sm"
+                    />
+                    <p className="text-xs text-slate-500 mt-1">
+                      {form.settings?.questionsPerPage > 0 
+                        ? `Form will show ${form.settings.questionsPerPage} question(s) per page. Total pages: ${Math.ceil((form.fields?.length || 0) / form.settings.questionsPerPage)}`
+                        : 'Set to 0 to show all questions on one page (default)'}
+                    </p>
+                  </div>
+                </div>
               </div>
 
 
