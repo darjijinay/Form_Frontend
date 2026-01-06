@@ -29,6 +29,10 @@ export const TEMPLATE_LIBRARY = [
       skills: false,
       deadline: false,
       employmentType: false,
+      destination: false,
+      duration: false,
+      price: false,
+      itinerary: false,
     },
     fields: [
       { _id: "f1", type: "short_text", label: "Full Name", required: true, placeholder: "Enter your full name", order: 0 },
@@ -68,6 +72,10 @@ export const TEMPLATE_LIBRARY = [
       organizerName: false,
       organizerEmail: false,
       organizerPhone: false,
+      destination: false,
+      duration: false,
+      price: false,
+      itinerary: false,
     },
     fields: [
       { _id: "f1", type: "short_text", label: "Full Name", required: true, placeholder: "Enter your full name", order: 0 },
@@ -80,7 +88,7 @@ export const TEMPLATE_LIBRARY = [
     ]
   },
   {
-    id: "tpl3",
+    id: "tpl_customer_feedback",
     title: "Customer Feedback",
     description: "Gather insights from your customers about your product.",
     category: "Feedback",
@@ -99,6 +107,10 @@ export const TEMPLATE_LIBRARY = [
       skills: false,
       deadline: false,
       employmentType: false,
+      destination: false,
+      duration: false,
+      price: false,
+      itinerary: false,
     },
     fields: [
       { _id: "f1", type: "short_text", label: "Name", required: false, placeholder: "Your name (optional)", order: 0 },
@@ -130,6 +142,10 @@ export const TEMPLATE_LIBRARY = [
       skills: false,
       deadline: false,
       employmentType: false,
+      destination: false,
+      duration: false,
+      price: false,
+      itinerary: false,
     },
     fields: [
       { _id: "f1", type: "short_text", label: "First Name", required: true, placeholder: "Enter first name", order: 0 },
@@ -143,11 +159,23 @@ export const TEMPLATE_LIBRARY = [
     ]
   },
   {
-    id: "tpl5",
-    title: "Event ",
+    id: "tpl3",
+    title: "Event RSVP",
     description: "Simple RSVP form for parties, weddings, and corporate events.",
     category: "Events",
-    formDetails: {},
+    formDetails: {
+      title: "Event RSVP",
+      description: "Let us know if you can make it to our event!",
+      subtitle: "We're excited to see you there.",
+      location: "Online / Venue Name",
+      date: "",
+      time: "",
+      organizerName: "",
+      organizerEmail: "",
+      eventStatus: "Scheduled",
+      capacity: "",
+      agenda: "",
+    },
     step1VisibleFields: {
       subtitle: false,
       logo: false,
@@ -162,6 +190,13 @@ export const TEMPLATE_LIBRARY = [
       skills: false,
       deadline: false,
       employmentType: false,
+      eventStatus: true,
+      capacity: true,
+      agenda: true,
+      destination: false,
+      duration: false,
+      price: false,
+      itinerary: false,
     },
     fields: [
       { _id: "f1", type: "short_text", label: "Full Name", required: true, placeholder: "Enter your name", order: 0 },
@@ -303,10 +338,15 @@ export const TEMPLATE_LIBRARY = [
     formDetails: {
       title: "Trip Package Booking",
       description: "Plan your perfect trip with us.",
+      destination: "",
+      duration: "",
+      price: "",
+      itinerary: ""
     },
     step1VisibleFields: {
-      subtitle: false,
-      logo: false,
+      subtitle: true,
+      logo: true,
+      headerImage: false,
       location: false,
       date: false,
       time: false,
@@ -317,6 +357,10 @@ export const TEMPLATE_LIBRARY = [
       skills: false,
       deadline: false,
       employmentType: false,
+      destination: true,
+      duration: true,
+      price: true,
+      itinerary: true,
     },
     fields: [
       { _id: "tp1", type: "short_text", label: "Name", required: true, placeholder: "Enter your name", order: 0 },
@@ -324,7 +368,6 @@ export const TEMPLATE_LIBRARY = [
       { _id: "tp3", type: "dropdown", label: "Package Type", required: true, options: ["Standard", "Deluxe", "Premium", "Custom"], order: 2 },
       { _id: "tp4", type: "date", label: "Travel Date", required: true, placeholder: "Select date", order: 3 },
       { _id: "tp5", type: "short_text", label: "Traveler Name", required: true, placeholder: "Enter primary traveler name", order: 4 },
-      { _id: "tp6", type: "short_text", label: "Destination", required: true, placeholder: "Enter destination", order: 5 },
       { _id: "tp7", type: "number", label: "Number of Travelers", required: true, placeholder: "1", order: 6 }
     ]
   },

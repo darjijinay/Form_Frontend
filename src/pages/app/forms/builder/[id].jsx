@@ -99,7 +99,7 @@ export default function FormBuilderPage() {
       setForm(loadedForm);
 
       const template = loadedForm.sourceTemplate ? TEMPLATE_LIBRARY.find(t => t.id === loadedForm.sourceTemplate) : null;
-            const allPossibleOptionalFields = ['date', 'time', 'organizerEmail', 'organizerPhone', 'logo', 'headerImage', 'subtitle', 'organizerName', 'location', 'salary', 'skills', 'deadline', 'employmentType'];
+            const allPossibleOptionalFields = ['date', 'time', 'organizerEmail', 'organizerPhone', 'logo', 'headerImage', 'subtitle', 'organizerName', 'location', 'salary', 'skills', 'deadline', 'employmentType', 'eventStatus', 'capacity', 'agenda'];
       const visibility = {};
 
       if (template) {

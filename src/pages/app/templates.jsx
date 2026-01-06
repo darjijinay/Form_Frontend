@@ -38,7 +38,7 @@ const FALLBACK_TEMPLATES = [
     ]
   },
   { 
-    id: "tpl3", 
+    id: "tpl_customer_feedback", 
     title: "Customer Feedback", 
     description: "Gather insights from your customers about your product.", 
     category: "Feedback",
@@ -70,7 +70,7 @@ const FALLBACK_TEMPLATES = [
     ]
   },
   { 
-    id: "tpl5", 
+    id: "tpl3", 
     title: "Event RSVP", 
     description: "Simple RSVP form for parties, weddings, and corporate events.", 
     category: "Events",

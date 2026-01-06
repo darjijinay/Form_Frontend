@@ -4,7 +4,9 @@ import { useState } from 'react';
 const fieldCategories = {
   'Basic': ['subtitle', 'logo', 'headerImage', 'location'],
   'Event': ['date', 'time', 'organizerName', 'organizerEmail', 'organizerPhone'],
-  'Job Application': ['salary', 'employmentType', 'skills', 'deadline']
+  'Job Application': ['salary', 'employmentType', 'skills', 'deadline'],
+  'Event RSVP': ['eventStatus', 'capacity', 'agenda'],
+  'Trip Package': ['destination', 'duration', 'price', 'itinerary']
 };
 
 const fieldLabels = {
@@ -20,7 +22,14 @@ const fieldLabels = {
     salary: 'Salary',
     employmentType: 'Employment Type',
     skills: 'Skills',
-    deadline: 'Application Deadline'
+    deadline: 'Application Deadline',
+    eventStatus: 'Event Status',
+    capacity: 'Capacity',
+    agenda: 'Agenda',
+    destination: 'Destination',
+    duration: 'Duration',
+    price: 'Price',
+    itinerary: 'Itinerary'
 };
 
 const AddFieldDropdown = ({ onAddField, availableFields, formTemplate }) => {
@@ -28,12 +37,26 @@ const AddFieldDropdown = ({ onAddField, availableFields, formTemplate }) => {
 
   const getVisibleCategories = () => {
     const visibleCategories = {};
-    for (const category in fieldCategories) {
-      const fields = fieldCategories[category].filter(field => availableFields.includes(field));
-      if (fields.length > 0) {
-        if (formTemplate === 'tpl1' && category === 'Job Application') continue;
-        if (formTemplate === 'tpl2' && category === 'Event') continue;
-        visibleCategories[category] = fields;
+    const categoriesToShow = ['Basic'];
+
+    if (formTemplate === 'tpl1') { // Workshop
+      categoriesToShow.push('Event');
+    } else if (formTemplate === 'tpl2') { // Job Application
+      categoriesToShow.push('Job Application');
+    } else if (formTemplate === 'tpl3') { // Event RSVP
+      categoriesToShow.push('Event RSVP');
+    } else if (formTemplate === 'tpl10') { // Trip Package
+        categoriesToShow.push('Trip Package');
+    } else { // No template or other templates
+      categoriesToShow.push('Event', 'Job Application', 'Event RSVP');
+    }
+
+    for (const category of categoriesToShow) {
+      if (fieldCategories[category]) {
+        const fields = fieldCategories[category].filter(field => availableFields.includes(field));
+        if (fields.length > 0) {
+          visibleCategories[category] = fields;
+        }
       }
     }
     return visibleCategories;
@@ -246,7 +269,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {visibleFields.date && (
+          {formTemplate === 'tpl1' && visibleFields.date && (
             <div>
               <div className="flex justify-between items-center mb-2">
                  <EditableLabel fieldKey="date" value={form.step1Labels?.date} onUpdate={handleLabelUpdate} defaultLabel="Date" />
@@ -263,7 +286,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
               />
             </div>
           )}
-          {visibleFields.time && (
+          {formTemplate === 'tpl1' && visibleFields.time && (
             <div>
               <div className="flex justify-between items-center mb-2">
                 <EditableLabel fieldKey="time" value={form.step1Labels?.time} onUpdate={handleLabelUpdate} defaultLabel="Time" />
@@ -311,6 +334,82 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
             <input type="tel" value={form.organizerPhone || ''} onChange={(e) => handleInputChange('organizerPhone', e.target.value)} placeholder="e.g., +1 (555) 123-4567" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
         )}
+
+        {formTemplate === 'tpl3' && visibleFields.eventStatus && (
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <EditableLabel fieldKey="eventStatus" value={form.step1Labels?.eventStatus} onUpdate={handleLabelUpdate} defaultLabel="Event Status" />
+              <button onClick={() => removeField('eventStatus')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+            </div>
+            <select value={form.eventStatus || ''} onChange={(e) => handleInputChange('eventStatus', e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="Scheduled">Scheduled</option>
+              <option value="Canceled">Canceled</option>
+              <option value="Postponed">Postponed</option>
+            </select>
+          </div>
+        )}
+
+        {formTemplate === 'tpl3' && visibleFields.capacity && (
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <EditableLabel fieldKey="capacity" value={form.step1Labels?.capacity} onUpdate={handleLabelUpdate} defaultLabel="Capacity" />
+              <button onClick={() => removeField('capacity')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+            </div>
+            <input type="number" value={form.capacity || ''} onChange={(e) => handleInputChange('capacity', e.target.value)} placeholder="e.g., 100" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        )}
+
+        {formTemplate === 'tpl3' && visibleFields.agenda && (
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <EditableLabel fieldKey="agenda" value={form.step1Labels?.agenda} onUpdate={handleLabelUpdate} defaultLabel="Agenda" />
+              <button onClick={() => removeField('agenda')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+            </div>
+            <textarea value={form.agenda || ''} onChange={(e) => handleInputChange('agenda', e.target.value)} placeholder="e.g., 10:00 AM - Welcome, 10:30 AM - ..." rows="4" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        )}
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+
+{formTemplate === 'tpl10' && visibleFields.destination && (
+    <div>
+        <div className="flex justify-between items-center mb-2">
+            <EditableLabel fieldKey="destination" value={form.step1Labels?.destination} onUpdate={handleLabelUpdate} defaultLabel="Destination" />
+            <button onClick={() => removeField('destination')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+        </div>
+        <input type="text" value={form.destination || ''} onChange={(e) => handleInputChange('destination', e.target.value)} placeholder="e.g., Paris, France" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+    </div>
+)}
+{formTemplate === 'tpl10' && visibleFields.duration && (
+    <div>
+        <div className="flex justify-between items-center mb-2">
+            <EditableLabel fieldKey="duration" value={form.step1Labels?.duration} onUpdate={handleLabelUpdate} defaultLabel="Duration" />
+            <button onClick={() => removeField('duration')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+        </div>
+        <input type="text" value={form.duration || ''} onChange={(e) => handleInputChange('duration', e.target.value)} placeholder="e.g., 7 Days, 6 Nights" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+    </div>
+)}
+</div>
+
+{formTemplate === 'tpl10' && visibleFields.price && (
+    <div className="mb-6">
+        <div className="flex justify-between items-center mb-2">
+            <EditableLabel fieldKey="price" value={form.step1Labels?.price} onUpdate={handleLabelUpdate} defaultLabel="Price" />
+            <button onClick={() => removeField('price')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+        </div>
+        <input type="text" value={form.price || ''} onChange={(e) => handleInputChange('price', e.target.value)} placeholder="e.g., $1500 per person" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+    </div>
+)}
+
+{formTemplate === 'tpl10' && visibleFields.itinerary && (
+    <div className="mb-6">
+        <div className="flex justify-between items-center mb-2">
+            <EditableLabel fieldKey="itinerary" value={form.step1Labels?.itinerary} onUpdate={handleLabelUpdate} defaultLabel="Itinerary" />
+            <button onClick={() => removeField('itinerary')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+        </div>
+        <textarea value={form.itinerary || ''} onChange={(e) => handleInputChange('itinerary', e.target.value)} placeholder="e.g., Day 1: Arrival, Day 2: Sightseeing..." rows="4" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+    </div>
+)}
         
         <div className="mb-6">
           <AddFieldDropdown onAddField={addField} availableFields={availableFieldsToAdd} formTemplate={formTemplate} />
