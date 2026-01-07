@@ -82,9 +82,9 @@ export default function FormBuilder({ initialForm, onChange }) {
         fields = [...prev.fields, newField];
       }
 
-      return { 
-        ...prev, 
-        fields: fields.map((f, idx) => ({ ...f, order: idx }))
+      return {
+        ...prev,
+        fields: fields.map((f, idx) => ({ ...f, order: idx })),
       };
     });
   };
@@ -228,17 +228,19 @@ export default function FormBuilder({ initialForm, onChange }) {
       {/* Desktop View */}
       <div className="hidden lg:grid grid-cols-[250px_minmax(0,1fr)_280px] gap-4 h-full">
         <FieldPalette onAddField={addField} />
-        <FormCanvas
-          form={form}
-          onSelectField={setSelectedFieldId}
-          selectedFieldId={selectedFieldId}
-          onMoveField={moveField}
-          onRemoveField={removeField}
-          onUpdateMeta={updateMeta}
-          onDuplicateField={duplicateField}
-          onReorderFields={reorderFields}
-          onAddField={addField}
-        />
+        <div className="flex flex-col min-h-0 gap-3">
+          <FormCanvas
+            form={form}
+            onSelectField={setSelectedFieldId}
+            selectedFieldId={selectedFieldId}
+            onMoveField={moveField}
+            onRemoveField={removeField}
+            onUpdateMeta={updateMeta}
+            onDuplicateField={duplicateField}
+            onReorderFields={reorderFields}
+            onAddField={addField}
+          />
+        </div>
         <FieldSettingsPanel
           field={selectedField}
           fields={form.fields}

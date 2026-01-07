@@ -171,30 +171,53 @@ export default function PreviewPanel({ form, isOpen, onClose }) {
     </div>
   );
 
-  const renderForm = () => (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">{form.title || 'Untitled Form'}</h1>
-        {form.description && <p className="text-slate-600">{form.description}</p>}
-      </div>
-      <div className="space-y-4">
-        {form.fields && form.fields.length > 0 ? (
-          <FormRenderer form={form} isPreview={true} />
-        ) : (
-          <div className="text-center py-12 text-slate-500">
-            <p>No fields added yet. Add fields in Step 2 to see them here.</p>
+  const renderForm = () => {
+    // Determine send copy mode
+    const sendCopyMode = typeof form.settings?.sendResponseCopy === 'string'
+      ? form.settings.sendResponseCopy
+      : (form.settings?.sendResponseCopy ? 'requested' : 'off');
+    const showSendCopyCheckbox = (form.settings?.collectEmails === 'responder_input' || form.fields?.some(f => f.type === 'email')) && sendCopyMode === 'requested';
+
+    return (
+      <div className="p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">{form.title || 'Untitled Form'}</h1>
+          {form.description && <p className="text-slate-600">{form.description}</p>}
+        </div>
+        <div className="space-y-4">
+          {form.fields && form.fields.length > 0 ? (
+            <FormRenderer form={form} isPreview={true} />
+          ) : (
+            <div className="text-center py-12 text-slate-500">
+              <p>No fields added yet. Add fields in Step 2 to see them here.</p>
+            </div>
+          )}
+        </div>
+        {showSendCopyCheckbox && (
+          <div className="mt-6 mb-4">
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="preview_send_copy_checkbox"
+                disabled
+                className="mt-1 w-4 h-4 cursor-not-allowed"
+              />
+              <label htmlFor="preview_send_copy_checkbox" className="text-sm text-slate-700 cursor-not-allowed">
+                Send me a copy of my responses
+              </label>
+            </div>
+          </div>
+        )}
+        {form.fields && form.fields.length > 0 && (
+          <div className="mt-6">
+            <button disabled className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium cursor-not-allowed opacity-75">
+              Submit (Preview Mode)
+            </button>
           </div>
         )}
       </div>
-      {form.fields && form.fields.length > 0 && (
-        <div className="mt-6">
-          <button disabled className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium cursor-not-allowed opacity-75">
-            Submit (Preview Mode)
-          </button>
-        </div>
-      )}
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] p-4 backdrop-blur-sm">

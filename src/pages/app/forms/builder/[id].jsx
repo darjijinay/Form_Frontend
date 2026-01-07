@@ -296,9 +296,107 @@ export default function FormBuilderPage() {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4 items-start">
-                <div className="space-y-3 border rounded-lg p-4 bg-slate-50">
-                  <h3 className="font-semibold text-sm">Email Notifications</h3>
+              <div className="space-y-4">
+                {/* Email Collection Section */}
+                <div className="border rounded-lg p-4 bg-white">
+                  <h3 className="font-semibold text-base mb-4">Responses</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-slate-700 block mb-2">Collect email addresses</label>
+                      {/* Disable when an email field already exists to avoid conflicts */}
+                      <select
+                        value={form.settings?.collectEmails || 'none'}
+                        disabled={form.fields?.some(f => f.type === 'email') && form.settings?.collectEmails !== 'responder_input'}
+                        onChange={async (e) => {
+                          const value = e.target.value;
+                          const newForm = { ...form, settings: { ...form.settings, collectEmails: value } };
+                          
+                          // Add email field when collecting, remove when not collecting
+                          if (value === 'responder_input') {
+                            const hasEmailField = newForm.fields?.some(f => f.type === 'email');
+                            if (!hasEmailField) {
+                              const emailField = {
+                                _id: `field_${Date.now()}`,
+                                type: 'email',
+                                label: 'Email Address',
+                                required: true,
+                                order: 0,
+                                validation: { required: true, email: true }
+                              };
+                              newForm.fields = [emailField, ...(newForm.fields || [])];
+                            }
+                          } else {
+                            // Remove any email fields when collection is off
+                            newForm.fields = (newForm.fields || []).filter(f => f.type !== 'email');
+                          }
+                          
+                          setForm(newForm);
+                          try {
+                            setSaving(true);
+                            const { data } = await formApi.updateForm(form._id, newForm);
+                            setForm(data);
+                            setStatus('✓ Settings saved');
+                            setTimeout(() => setStatus(''), 2000);
+                          } catch (error) {
+                            console.error('Error saving settings:', error);
+                            setStatus('Error saving');
+                          } finally {
+                            setSaving(false);
+                          }
+                        }}
+                        className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        title={form.fields?.some(f => f.type === 'email') && form.settings?.collectEmails !== 'responder_input' ? 'Disabled because an email field already exists' : ''}
+                      >
+                        <option value="none">Do not collect</option>
+                        <option value="responder_input">Responder input</option>
+                      </select>
+                      <div className="mt-2 text-xs text-slate-600">
+                        {form.settings?.collectEmails === 'none' && (
+                          <p>Email addresses will not be collected.</p>
+                        )}
+                        {form.settings?.collectEmails === 'responder_input' && (
+                          <p>Respondents will be asked to provide their email address in the form.</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {(form.settings?.collectEmails === 'responder_input' || form.fields?.some(f => f.type === 'email')) && (
+                      <div className="pt-2 border-t border-slate-200 space-y-2">
+                        <label className="text-sm font-medium text-slate-700 block">Send responders a copy of their response</label>
+                        <select
+                          value={typeof form.settings?.sendResponseCopy === 'string' ? form.settings.sendResponseCopy : (form.settings?.sendResponseCopy ? 'requested' : 'off')}
+                          onChange={async (e) => {
+                            const newForm = { ...form, settings: { ...form.settings, sendResponseCopy: e.target.value } };
+                            setForm(newForm);
+                            try {
+                              setSaving(true);
+                              const { data } = await formApi.updateForm(form._id, newForm);
+                              setForm(data);
+                              setStatus('✓ Settings saved');
+                              setTimeout(() => setStatus(''), 2000);
+                            } catch (error) {
+                              console.error('Error saving settings:', error);
+                              setStatus('Error saving');
+                            } finally {
+                              setSaving(false);
+                            }
+                          }}
+                          className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                          <option value="off">Off</option>
+                          <option value="requested">When requested (checkbox on form)</option>
+                          <option value="always">Always send</option>
+                        </select>
+                        <p className="text-xs text-slate-600">Copies require the email field. "When requested" shows a checkbox on the public form; "Always" sends without asking.</p>
+                      </div>
+                    )}
+
+                  </div>
+                </div>
+
+                {/* Email Notifications Section */}
+                <div className="border rounded-lg p-4 bg-white">
+                  <h3 className="font-semibold text-base mb-4">Email Notifications</h3>
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -340,8 +438,23 @@ export default function FormBuilderPage() {
                         type="email"
                         value={form.settings?.notificationEmail || ''}
                         onChange={(e) => setForm({...form, settings: {...form.settings, notificationEmail: e.target.value}})}
+                        onBlur={async () => {
+                          // Auto-save when user leaves the email field
+                          try {
+                            setSaving(true);
+                            const { data } = await formApi.updateForm(form._id, form);
+                            setForm(data);
+                            setStatus('✓ Notification email saved');
+                            setTimeout(() => setStatus(''), 2000);
+                          } catch (error) {
+                            console.error('Error saving notification email:', error);
+                            setStatus('Error saving');
+                          } finally {
+                            setSaving(false);
+                          }
+                        }}
                         placeholder={user?.email || "your@email.com"}
-                        className="w-full px-3 py-2 border rounded text-sm"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       />
                       {user?.email && (
                         <p className="text-xs text-slate-500 mt-1">Default: {user.email}</p>
@@ -351,12 +464,16 @@ export default function FormBuilderPage() {
                   )}
                 </div>
 
-                <div className="space-y-3">
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" checked={!!form.settings?.isPublic} onChange={(e) => setForm({...form, settings: {...form.settings, isPublic: e.target.checked}})} />
-                    <span className="text-sm">Make form public</span>
-                  </label>
-                  <p className="text-sm text-slate-500 mt-2">When published, anyone with the link can view and submit this form.</p>
+                {/* Form Settings Section */}
+                <div className="border rounded-lg p-4 bg-white">
+                  <h3 className="font-semibold text-base mb-4">General Settings</h3>
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-2">
+                      <input type="checkbox" checked={!!form.settings?.isPublic} onChange={(e) => setForm({...form, settings: {...form.settings, isPublic: e.target.checked}})} className="w-4 h-4" />
+                      <span className="text-sm text-slate-700">Make form public</span>
+                    </label>
+                    <p className="text-xs text-slate-500 ml-6">When published, anyone with the link can view and submit this form.</p>
+                  </div>
                 </div>
 
                 {/* Pagination Settings */}
@@ -398,8 +515,6 @@ export default function FormBuilderPage() {
                   </div>
                 </div>
               </div>
-
-
 
               <div className="bg-slate-50 p-4 rounded mt-6">
                 <div className="flex items-center justify-between">

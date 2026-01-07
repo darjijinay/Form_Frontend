@@ -16,8 +16,8 @@ export const formApi = {
   getPublicForm: (id) => axiosClient.get(`/forms/${id}/public`),
 
   // responses
-  submitResponse: (formId, answers) =>
-    axiosClient.post(`/responses/${formId}`, { answers }),
+  submitResponse: (formId, payload) =>
+    axiosClient.post(`/responses/${formId}`, payload),
 
   getResponses: (formId, params) =>
     axiosClient.get(`/responses/form/${formId}`, { params }),

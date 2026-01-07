@@ -288,7 +288,7 @@ export default function FormCanvas({
                   <div
                     onDragEnter={(e) => handleDragEnter(e, index + 1)}
                     onDrop={(e) => handleDrop(e, index + 1)}
-                    className={`transition-all duration-200 ${
+                      className={`transition-all duration-200 ${
                       dragOverIndex === index + 1 && isDraggingFromPalette
                         ? 'h-16 border-2 border-dashed border-indigo-500 bg-indigo-50/50 rounded-xl flex items-center justify-center text-sm font-medium text-indigo-600'
                         : 'h-1 hover:h-12 hover:border-2 hover:border-dashed hover:border-slate-300 hover:bg-slate-50 rounded-lg'
