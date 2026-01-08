@@ -122,6 +122,27 @@ export default function PublicFormPage(){
     const organizerPhoneDetail = form.organizerPhone ? { value: form.organizerPhone, label: organizerPhoneLabel } : findCustomDetail((label) => /organizer phone|phone|mobile|contact phone|phone number|tel|telephone/i.test(String(label).toLowerCase()));
     if (organizerPhoneDetail) initialInfoCards.push({ label: organizerPhoneDetail.label || organizerPhoneLabel, value: organizerPhoneDetail.value, icon: '📞' });
 
+    const destinationDetail = form.destination ? { value: form.destination, label: getLabel('destination', 'Destination') } : findCustomDetail((label) => /destination/i.test(label));
+    if (destinationDetail) initialInfoCards.push({ label: destinationDetail.label, value: destinationDetail.value, icon: '✈️' });
+
+    const durationDetail = form.duration ? { value: form.duration, label: getLabel('duration', 'Duration') } : findCustomDetail((label) => /duration/i.test(label));
+    if (durationDetail) initialInfoCards.push({ label: durationDetail.label, value: durationDetail.value, icon: '⏳' });
+
+    const priceDetail = form.price ? { value: form.price, label: getLabel('price', 'Price') } : findCustomDetail((label) => /price/i.test(label));
+    if (priceDetail) initialInfoCards.push({ label: priceDetail.label, value: priceDetail.value, icon: '💰' });
+
+    const appointmentTitleDetail = form.appointmentTitle ? { value: form.appointmentTitle, label: getLabel('appointmentTitle', 'Appointment Title') } : findCustomDetail((label) => /appointment title/i.test(label));
+    if (appointmentTitleDetail) initialInfoCards.push({ label: appointmentTitleDetail.label, value: appointmentTitleDetail.value, icon: '🏷️' });
+
+    const appointmentDateTimeDetail = form.appointmentDateTime ? { value: form.appointmentDateTime, label: getLabel('appointmentDateTime', 'Date & Time') } : findCustomDetail((label) => /appointment date|appointment time/i.test(label));
+    if (appointmentDateTimeDetail && appointmentDateTimeDetail.value) initialInfoCards.push({ label: appointmentDateTimeDetail.label, value: new Date(appointmentDateTimeDetail.value).toLocaleString(), icon: '🗓️' });
+
+    const appointmentLocationDetail = form.appointmentLocation ? { value: form.appointmentLocation, label: getLabel('appointmentLocation', 'Location') } : findCustomDetail((label) => /appointment location/i.test(label));
+    if (appointmentLocationDetail) initialInfoCards.push({ label: appointmentLocationDetail.label, value: appointmentLocationDetail.value, icon: '📍' });
+
+    const appointmentTypeDetail = form.appointmentType ? { value: form.appointmentType, label: getLabel('appointmentType', 'Appointment Type') } : findCustomDetail((label) => /appointment type/i.test(label));
+    if (appointmentTypeDetail) initialInfoCards.push({ label: appointmentTypeDetail.label, value: appointmentTypeDetail.value, icon: '📄' });
+
     const organizerNameVal = organizerNameDetail ? organizerNameDetail.value : (form.organizerName || null);
     const organizerEmailVal = organizerEmailDetail ? organizerEmailDetail.value : (form.organizerEmail || null);
     const organizerPhoneVal = organizerPhoneDetail ? organizerPhoneDetail.value : (form.organizerPhone || null);
@@ -147,6 +168,7 @@ export default function PublicFormPage(){
     }
 
     const remainingCustomDetails = Array.isArray(form.customDetails) ? form.customDetails.filter((_, idx) => !usedCustomIndexes.has(idx)) : [];
+    const itineraryLines = form.itinerary ? form.itinerary.split('\n').filter(line => line.trim()) : [];
 
     return (
         <main className="min-h-screen bg-slate-50 font-sans">
@@ -183,6 +205,43 @@ export default function PublicFormPage(){
                   <p className="whitespace-pre-wrap text-lg leading-relaxed">{form.description}</p>
                 </div>
               )}
+
+              {form.appointmentDescription && (
+                <div className="mb-8 max-w-none">
+                    <h2 className="text-xl font-bold text-slate-700 mb-3 text-center">{form.step1Labels?.appointmentDescription || 'Appointment Description'}</h2>
+                    <p className="whitespace-pre-wrap text-lg leading-relaxed text-slate-600">{form.appointmentDescription}</p>
+                </div>
+              )}
+  
+              {/* Itinerary */}
+              {itineraryLines.length > 0 && (
+                <div className="mb-8 max-w-none">
+                    <h2 className="text-xl font-bold text-slate-700 mb-6 text-center">Itinerary</h2>
+                    <div className="space-y-0">
+                        {itineraryLines.map((line, index) => {
+                            const parts = line.split(/:(.*)/s);
+                            const title = parts[0].trim();
+                            const description = parts[1] ? parts[1].trim() : '';
+                            return (
+                                <div key={index} className="flex gap-4">
+                                    <div className="flex flex-col items-center">
+                                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold">
+                                            {index + 1}
+                                        </div>
+                                        {index < itineraryLines.length - 1 && (
+                                            <div className="w-px flex-grow bg-slate-300 my-2"></div>
+                                        )}
+                                    </div>
+                                    <div className="pb-8">
+                                        <p className="font-bold text-slate-800">{title}</p>
+                                        {description && <p className="text-slate-600 mt-1">{description}</p>}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+              )}
   
               {/* Info Cards */}
               {infoCards.length > 0 && (
@@ -212,7 +271,7 @@ export default function PublicFormPage(){
                       {remainingCustomDetails.map((detail, idx) => (
                         <div key={idx} className={`flex items-center justify-between p-4 ${idx > 0 ? 'border-t border-slate-200' : ''}`}>
                           <span className="font-semibold text-slate-600">{detail.label || 'Detail'}</span>
-                          <span className="text-slate-500 text-right">{detail.value || '—'}</span>
+                          <span className="text-slate-500 text-right whitespace-pre-wrap">{detail.value || '—'}</span>
                         </div>
                       ))}
                     </div>

@@ -1,3 +1,5 @@
+export const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 /**
  * Validate a single field value against its validation rules
  * @param {*} value - The field value to validate
@@ -53,7 +55,6 @@ export const validateField = (value, field) => {
 
   // Email validation
   if (field.type === 'email' || validation.email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(String(value))) {
       return {
         isValid: false,

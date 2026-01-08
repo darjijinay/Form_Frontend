@@ -6,6 +6,7 @@ import { authApi } from '../../api/authApi';
 import { useAuthStore } from '../../store/authStore';
 import logo from '../../assets/logo.png';
 import loginImg from '../../assets/login.jpeg';
+import { emailRegex } from '../../utils/validateField';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function RegisterPage() {
   const [code, setCode] = useState('');
   const [timer, setTimer] = useState(300); // 5 minutes in seconds
   const [resending, setResending] = useState(false);
+  const [emailError, setEmailError] = useState('');
   const timerRef = useRef();
 
   // Timer effect
@@ -30,7 +32,16 @@ export default function RegisterPage() {
     return () => clearTimeout(timerRef.current);
   }, [timer, step]);
 
-  const emailRegex = /^[\w-.]+@[\w-]+\.[a-zA-Z]{2,}$/;
+  const handleEmailChange = (e) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    if (newEmail && !emailRegex.test(newEmail)) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setEmailError('');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -109,7 +120,8 @@ export default function RegisterPage() {
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Email Address</label>
-                <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition" type="email" required />
+                <input value={email} onChange={handleEmailChange} placeholder="you@example.com" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition" type="email" required />
+                {emailError && <p className="text-sm text-red-500 mt-1">{emailError}</p>}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Password</label>

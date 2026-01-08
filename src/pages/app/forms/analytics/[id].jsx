@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import AppLayout from '../../../../components/layout/AppLayout';
 import AnalyticsDashboard from '../../../../components/analytics/AnalyticsDashboard';
@@ -104,11 +104,7 @@ function ResponsesList({ formId, form }) {
   const [total, setTotal] = useState(0);
   const [limit] = useState(20);
 
-  useEffect(() => {
-    loadResponses();
-  }, [formId, page, search]);
-
-  const loadResponses = async () => {
+  const loadResponses = useCallback(async () => {
     try {
       setLoading(true);
       const { data } = await analyticsApi.getFormResponses(formId, {
@@ -123,14 +119,31 @@ function ResponsesList({ formId, form }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [formId, page, limit, search]);
+
+  useEffect(() => {
+    loadResponses();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadResponses();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [loadResponses]);
+
 
   const pages = Math.ceil(total / limit);
 
   return (
     <div className="space-y-4">
-      {/* Search */}
-      <div className="bg-white rounded-lg shadow p-4">
+      {/* Search and Refresh */}
+      <div className="bg-white rounded-lg shadow p-4 flex gap-4">
         <input
           type="text"
           placeholder="Search responses..."
@@ -141,6 +154,16 @@ function ResponsesList({ formId, form }) {
           }}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        <button
+          onClick={loadResponses}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md flex items-center gap-2"
+          disabled={loading}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5M4 20h5v-5M20 4h-5v5" />
+          </svg>
+          Refresh
+        </button>
       </div>
 
       {/* Responses */}

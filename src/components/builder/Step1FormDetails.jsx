@@ -6,7 +6,8 @@ const fieldCategories = {
   'Event': ['date', 'time', 'organizerName', 'organizerEmail', 'organizerPhone'],
   'Job Application': ['salary', 'employmentType', 'skills', 'deadline'],
   'Event RSVP': ['eventStatus', 'capacity', 'agenda'],
-  'Trip Package': ['destination', 'duration', 'price', 'itinerary']
+  'Trip Package': ['destination', 'duration', 'price', 'itinerary'],
+  'Appointment Booking': ['appointmentTitle', 'appointmentType', 'appointmentDateTime', 'appointmentLocation', 'appointmentDescription']
 };
 
 const fieldLabels = {
@@ -29,7 +30,12 @@ const fieldLabels = {
     destination: 'Destination',
     duration: 'Duration',
     price: 'Price',
-    itinerary: 'Itinerary'
+    itinerary: 'Itinerary',
+    appointmentTitle: 'Appointment Title',
+    appointmentType: 'Appointment Type',
+    appointmentDateTime: 'Appointment Date & Time',
+    appointmentLocation: 'Appointment Location',
+    appointmentDescription: 'Appointment Description'
 };
 
 const AddFieldDropdown = ({ onAddField, availableFields, formTemplate }) => {
@@ -39,16 +45,16 @@ const AddFieldDropdown = ({ onAddField, availableFields, formTemplate }) => {
     const visibleCategories = {};
     const categoriesToShow = ['Basic'];
 
-    if (formTemplate === 'tpl1') { // Workshop
-      categoriesToShow.push('Event');
-    } else if (formTemplate === 'tpl2') { // Job Application
-      categoriesToShow.push('Job Application');
-    } else if (formTemplate === 'tpl3') { // Event RSVP
-      categoriesToShow.push('Event RSVP');
-    } else if (formTemplate === 'tpl10') { // Trip Package
-        categoriesToShow.push('Trip Package');
-    } else { // No template or other templates
-      categoriesToShow.push('Event', 'Job Application', 'Event RSVP');
+    const templateToCategory = {
+      'tpl1': 'Event',
+      'tpl2': 'Job Application',
+      'tpl3': 'Event RSVP',
+      'tpl10': 'Trip Package',
+      'tpl11': 'Appointment Booking',
+    };
+
+    if (templateToCategory[formTemplate]) {
+      categoriesToShow.push(templateToCategory[formTemplate]);
     }
 
     for (const category of categoriesToShow) {
@@ -168,14 +174,14 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <div className="mb-2">
-              <EditableLabel fieldKey="title" value={form.step1Labels?.title} onUpdate={handleLabelUpdate} defaultLabel="Form Title / Event Name" />
+              <EditableLabel fieldKey="title" value={form.step1Labels?.title} onUpdate={handleLabelUpdate} defaultLabel="Form Title / Event Name" formTemplate={formTemplate} />
             </div>
             <input type="text" value={form.title || ''} onChange={(e) => handleInputChange('title', e.target.value)} placeholder="e.g., Workshop Registration" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
           {visibleFields.subtitle && (
             <div>
               <div className="flex justify-between items-center mb-2">
-                <EditableLabel fieldKey="subtitle" value={form.step1Labels?.subtitle} onUpdate={handleLabelUpdate} defaultLabel="Short Subtitle (optional)" />
+                <EditableLabel fieldKey="subtitle" value={form.step1Labels?.subtitle} onUpdate={handleLabelUpdate} defaultLabel="Short Subtitle (optional)" formTemplate={formTemplate} />
                 <button onClick={() => removeField('subtitle')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
               <input type="text" value={form.subtitle || ''} onChange={(e) => handleInputChange('subtitle', e.target.value)} placeholder="e.g., 2024 Annual Workshop" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -184,7 +190,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         </div>
         <div className="mb-6">
           <div className="mb-2">
-            <EditableLabel fieldKey="description" value={form.step1Labels?.description} onUpdate={handleLabelUpdate} defaultLabel="Description / Purpose" />
+            <EditableLabel fieldKey="description" value={form.step1Labels?.description} onUpdate={handleLabelUpdate} defaultLabel="Description / Purpose" formTemplate={formTemplate} />
           </div>
           <textarea value={form.description || ''} onChange={(e) => handleInputChange('description', e.target.value)} placeholder="Explain the purpose and details..." rows="4" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
         </div>
@@ -192,7 +198,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         {visibleFields.logo && (
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
-               <EditableLabel fieldKey="logo" value={form.step1Labels?.logo} onUpdate={handleLabelUpdate} defaultLabel="Logo" />
+               <EditableLabel fieldKey="logo" value={form.step1Labels?.logo} onUpdate={handleLabelUpdate} defaultLabel="Logo" formTemplate={formTemplate} />
               <button onClick={() => removeField('logo')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
             </div>
             <input type="file" accept="image/png,image/jpeg,image/jpg,image/gif,image/svg+xml" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onload = (event) => { handleInputChange('logo', event.target?.result || ''); }; reader.readAsDataURL(file); } }} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100" />
@@ -203,7 +209,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         {visibleFields.headerImage && (
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
-               <EditableLabel fieldKey="headerImage" value={form.step1Labels?.headerImage} onUpdate={handleLabelUpdate} defaultLabel="Header Image" />
+               <EditableLabel fieldKey="headerImage" value={form.step1Labels?.headerImage} onUpdate={handleLabelUpdate} defaultLabel="Header Image" formTemplate={formTemplate} />
               <button onClick={() => removeField('headerImage')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
             </div>
             <input type="file" accept="image/png,image/jpeg,image/jpg,image/gif" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onload = (event) => { handleInputChange('headerImage', event.target?.result || ''); }; reader.readAsDataURL(file); } }} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100" />
@@ -214,7 +220,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         {visibleFields.location && (
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
-              <EditableLabel fieldKey="location" value={form.step1Labels?.location} onUpdate={handleLabelUpdate} defaultLabel="Location / Mode" />
+              <EditableLabel fieldKey="location" value={form.step1Labels?.location} onUpdate={handleLabelUpdate} defaultLabel="Location / Mode" formTemplate={formTemplate} />
               <button onClick={() => removeField('location')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
             </div>
             <input type="text" value={form.location || ''} onChange={(e) => handleInputChange('location', e.target.value)} placeholder="Online / Office / City, etc." className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -225,7 +231,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         {formTemplate === 'tpl2' && visibleFields.salary && (
           <div>
             <div className="flex justify-between items-center mb-2">
-              <EditableLabel fieldKey="salary" value={form.step1Labels?.salary} onUpdate={handleLabelUpdate} defaultLabel="Salary" />
+              <EditableLabel fieldKey="salary" value={form.step1Labels?.salary} onUpdate={handleLabelUpdate} defaultLabel="Salary" formTemplate={formTemplate} />
               <button onClick={() => removeField('salary')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
             </div>
             <input type="text" value={form.salary || ''} onChange={(e) => handleInputChange('salary', e.target.value)} placeholder="e.g., $100,000 - $120,000" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -234,7 +240,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         {formTemplate === 'tpl2' && visibleFields.employmentType && (
           <div>
             <div className="flex justify-between items-center mb-2">
-              <EditableLabel fieldKey="employmentType" value={form.step1Labels?.employmentType} onUpdate={handleLabelUpdate} defaultLabel="Employment Type" />
+              <EditableLabel fieldKey="employmentType" value={form.step1Labels?.employmentType} onUpdate={handleLabelUpdate} defaultLabel="Employment Type" formTemplate={formTemplate} />
               <button onClick={() => removeField('employmentType')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
             </div>
             <input type="text" value={form.employmentType || ''} onChange={(e) => handleInputChange('employmentType', e.target.value)} placeholder="e.g., Full-time, Contract" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -243,7 +249,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         {formTemplate === 'tpl2' && visibleFields.skills && (
             <div>
               <div className="flex justify-between items-center mb-2">
-                <EditableLabel fieldKey="skills" value={form.step1Labels?.skills} onUpdate={handleLabelUpdate} defaultLabel="Skills" />
+                <EditableLabel fieldKey="skills" value={form.step1Labels?.skills} onUpdate={handleLabelUpdate} defaultLabel="Skills" formTemplate={formTemplate} />
                 <button onClick={() => removeField('skills')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
               <input type="text" value={form.skills || ''} onChange={(e) => handleInputChange('skills', e.target.value)} placeholder="e.g., React, Node.js, ..." className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -252,7 +258,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
           {formTemplate === 'tpl2' && visibleFields.deadline && (
             <div>
               <div className="flex justify-between items-center mb-2">
-                <EditableLabel fieldKey="deadline" value={form.step1Labels?.deadline} onUpdate={handleLabelUpdate} defaultLabel="Application Deadline" />
+                <EditableLabel fieldKey="deadline" value={form.step1Labels?.deadline} onUpdate={handleLabelUpdate} defaultLabel="Application Deadline" formTemplate={formTemplate} />
                 <button onClick={() => removeField('deadline')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
               <input
@@ -272,7 +278,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
           {formTemplate === 'tpl1' && visibleFields.date && (
             <div>
               <div className="flex justify-between items-center mb-2">
-                 <EditableLabel fieldKey="date" value={form.step1Labels?.date} onUpdate={handleLabelUpdate} defaultLabel="Date" />
+                 <EditableLabel fieldKey="date" value={form.step1Labels?.date} onUpdate={handleLabelUpdate} defaultLabel="Date" formTemplate={formTemplate} />
                 <button onClick={() => removeField('date')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
               <input
@@ -289,7 +295,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
           {formTemplate === 'tpl1' && visibleFields.time && (
             <div>
               <div className="flex justify-between items-center mb-2">
-                <EditableLabel fieldKey="time" value={form.step1Labels?.time} onUpdate={handleLabelUpdate} defaultLabel="Time" />
+                <EditableLabel fieldKey="time" value={form.step1Labels?.time} onUpdate={handleLabelUpdate} defaultLabel="Time" formTemplate={formTemplate} />
                 <button onClick={() => removeField('time')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
               <input
@@ -309,7 +315,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
           {formTemplate === 'tpl1' && visibleFields.organizerName && (
             <div>
               <div className="flex justify-between items-center mb-2">
-                <EditableLabel fieldKey="organizerName" value={form.step1Labels?.organizerName} onUpdate={handleLabelUpdate} defaultLabel="Organizer Name" />
+                <EditableLabel fieldKey="organizerName" value={form.step1Labels?.organizerName} onUpdate={handleLabelUpdate} defaultLabel="Organizer Name" formTemplate={formTemplate} />
                 <button onClick={() => removeField('organizerName')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
               <input type="text" value={form.organizerName || ''} onChange={(e) => handleInputChange('organizerName', e.target.value)} placeholder="e.g., John Smith" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -318,7 +324,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
           {formTemplate === 'tpl1' && visibleFields.organizerEmail && (
             <div>
               <div className="flex justify-between items-center mb-2">
-                <EditableLabel fieldKey="organizerEmail" value={form.step1Labels?.organizerEmail} onUpdate={handleLabelUpdate} defaultLabel="Organizer Email" />
+                <EditableLabel fieldKey="organizerEmail" value={form.step1Labels?.organizerEmail} onUpdate={handleLabelUpdate} defaultLabel="Organizer Email" formTemplate={formTemplate} />
                 <button onClick={() => removeField('organizerEmail')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
               <input type="email" value={form.organizerEmail || ''} onChange={(e) => handleInputChange('organizerEmail', e.target.value)} placeholder="e.g., event.organizer@example.com" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -328,7 +334,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         {formTemplate === 'tpl1' && visibleFields.organizerPhone && (
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
-              <EditableLabel fieldKey="organizerPhone" value={form.step1Labels?.organizerPhone} onUpdate={handleLabelUpdate} formTemplate={formTemplate} />
+              <EditableLabel fieldKey="organizerPhone" value={form.step1Labels?.organizerPhone} onUpdate={handleLabelUpdate} defaultLabel="Organizer Phone" formTemplate={formTemplate} />
               <button onClick={() => removeField('organizerPhone')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
             </div>
             <input type="tel" value={form.organizerPhone || ''} onChange={(e) => handleInputChange('organizerPhone', e.target.value)} placeholder="e.g., +1 (555) 123-4567" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -338,7 +344,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         {formTemplate === 'tpl3' && visibleFields.eventStatus && (
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
-              <EditableLabel fieldKey="eventStatus" value={form.step1Labels?.eventStatus} onUpdate={handleLabelUpdate} defaultLabel="Event Status" />
+              <EditableLabel fieldKey="eventStatus" value={form.step1Labels?.eventStatus} onUpdate={handleLabelUpdate} defaultLabel="Event Status" formTemplate={formTemplate} />
               <button onClick={() => removeField('eventStatus')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
             </div>
             <select value={form.eventStatus || ''} onChange={(e) => handleInputChange('eventStatus', e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -352,7 +358,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         {formTemplate === 'tpl3' && visibleFields.capacity && (
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
-              <EditableLabel fieldKey="capacity" value={form.step1Labels?.capacity} onUpdate={handleLabelUpdate} defaultLabel="Capacity" />
+              <EditableLabel fieldKey="capacity" value={form.step1Labels?.capacity} onUpdate={handleLabelUpdate} defaultLabel="Capacity" formTemplate={formTemplate} />
               <button onClick={() => removeField('capacity')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
             </div>
             <input type="number" value={form.capacity || ''} onChange={(e) => handleInputChange('capacity', e.target.value)} placeholder="e.g., 100" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -362,7 +368,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
         {formTemplate === 'tpl3' && visibleFields.agenda && (
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
-              <EditableLabel fieldKey="agenda" value={form.step1Labels?.agenda} onUpdate={handleLabelUpdate} defaultLabel="Agenda" />
+              <EditableLabel fieldKey="agenda" value={form.step1Labels?.agenda} onUpdate={handleLabelUpdate} defaultLabel="Agenda" formTemplate={formTemplate} />
               <button onClick={() => removeField('agenda')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
             </div>
             <textarea value={form.agenda || ''} onChange={(e) => handleInputChange('agenda', e.target.value)} placeholder="e.g., 10:00 AM - Welcome, 10:30 AM - ..." rows="4" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -374,7 +380,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
 {formTemplate === 'tpl10' && visibleFields.destination && (
     <div>
         <div className="flex justify-between items-center mb-2">
-            <EditableLabel fieldKey="destination" value={form.step1Labels?.destination} onUpdate={handleLabelUpdate} defaultLabel="Destination" />
+            <EditableLabel fieldKey="destination" value={form.step1Labels?.destination} onUpdate={handleLabelUpdate} defaultLabel="Destination" formTemplate={formTemplate} />
             <button onClick={() => removeField('destination')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
         </div>
         <input type="text" value={form.destination || ''} onChange={(e) => handleInputChange('destination', e.target.value)} placeholder="e.g., Paris, France" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -383,7 +389,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
 {formTemplate === 'tpl10' && visibleFields.duration && (
     <div>
         <div className="flex justify-between items-center mb-2">
-            <EditableLabel fieldKey="duration" value={form.step1Labels?.duration} onUpdate={handleLabelUpdate} defaultLabel="Duration" />
+            <EditableLabel fieldKey="duration" value={form.step1Labels?.duration} onUpdate={handleLabelUpdate} defaultLabel="Duration" formTemplate={formTemplate} />
             <button onClick={() => removeField('duration')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
         </div>
         <input type="text" value={form.duration || ''} onChange={(e) => handleInputChange('duration', e.target.value)} placeholder="e.g., 7 Days, 6 Nights" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -394,7 +400,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
 {formTemplate === 'tpl10' && visibleFields.price && (
     <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-            <EditableLabel fieldKey="price" value={form.step1Labels?.price} onUpdate={handleLabelUpdate} defaultLabel="Price" />
+            <EditableLabel fieldKey="price" value={form.step1Labels?.price} onUpdate={handleLabelUpdate} defaultLabel="Price" formTemplate={formTemplate} />
             <button onClick={() => removeField('price')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
         </div>
         <input type="text" value={form.price || ''} onChange={(e) => handleInputChange('price', e.target.value)} placeholder="e.g., $1500 per person" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -404,10 +410,61 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
 {formTemplate === 'tpl10' && visibleFields.itinerary && (
     <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-            <EditableLabel fieldKey="itinerary" value={form.step1Labels?.itinerary} onUpdate={handleLabelUpdate} defaultLabel="Itinerary" />
+            <EditableLabel fieldKey="itinerary" value={form.step1Labels?.itinerary} onUpdate={handleLabelUpdate} defaultLabel="Itinerary" formTemplate={formTemplate} />
             <button onClick={() => removeField('itinerary')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
         </div>
         <textarea value={form.itinerary || ''} onChange={(e) => handleInputChange('itinerary', e.target.value)} placeholder="e.g., Day 1: Arrival, Day 2: Sightseeing..." rows="4" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+    </div>
+)}
+
+{formTemplate === 'tpl11' && visibleFields.appointmentTitle && (
+    <div className="mb-6">
+        <div className="flex justify-between items-center mb-2">
+            <EditableLabel fieldKey="appointmentTitle" value={form.step1Labels?.appointmentTitle} onUpdate={handleLabelUpdate} defaultLabel="Appointment Title" formTemplate={formTemplate} />
+            <button onClick={() => removeField('appointmentTitle')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+        </div>
+        <input type="text" value={form.appointmentTitle || ''} onChange={(e) => handleInputChange('appointmentTitle', e.target.value)} placeholder="e.g., Consultation, Follow-up" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+    </div>
+)}
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    {formTemplate === 'tpl11' && visibleFields.appointmentType && (
+        <div>
+            <div className="flex justify-between items-center mb-2">
+                <EditableLabel fieldKey="appointmentType" value={form.step1Labels?.appointmentType} onUpdate={handleLabelUpdate} defaultLabel="Appointment Type" formTemplate={formTemplate} />
+                <button onClick={() => removeField('appointmentType')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+            </div>
+            <input type="text" value={form.appointmentType || ''} onChange={(e) => handleInputChange('appointmentType', e.target.value)} placeholder="e.g., Online, In-person" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+    )}
+    {formTemplate === 'tpl11' && visibleFields.appointmentDateTime && (
+        <div>
+            <div className="flex justify-between items-center mb-2">
+                <EditableLabel fieldKey="appointmentDateTime" value={form.step1Labels?.appointmentDateTime} onUpdate={handleLabelUpdate} defaultLabel="Appointment Date & Time" formTemplate={formTemplate} />
+                <button onClick={() => removeField('appointmentDateTime')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+            </div>
+            <input type="datetime-local" value={form.appointmentDateTime || ''} onChange={(e) => handleInputChange('appointmentDateTime', e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+    )}
+</div>
+
+{formTemplate === 'tpl11' && visibleFields.appointmentLocation && (
+    <div className="mb-6">
+        <div className="flex justify-between items-center mb-2">
+            <EditableLabel fieldKey="appointmentLocation" value={form.step1Labels?.appointmentLocation} onUpdate={handleLabelUpdate} defaultLabel="Appointment Location" formTemplate={formTemplate} />
+            <button onClick={() => removeField('appointmentLocation')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+        </div>
+        <input type="text" value={form.appointmentLocation || ''} onChange={(e) => handleInputChange('appointmentLocation', e.target.value)} placeholder="e.g., Online, Office Address" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+    </div>
+)}
+
+{formTemplate === 'tpl11' && visibleFields.appointmentDescription && (
+    <div className="mb-6">
+        <div className="flex justify-between items-center mb-2">
+            <EditableLabel fieldKey="appointmentDescription" value={form.step1Labels?.appointmentDescription} onUpdate={handleLabelUpdate} defaultLabel="Appointment Description" formTemplate={formTemplate} />
+            <button onClick={() => removeField('appointmentDescription')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+        </div>
+        <textarea value={form.appointmentDescription || ''} onChange={(e) => handleInputChange('appointmentDescription', e.target.value)} placeholder="e.g., Discuss project details" rows="4" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
     </div>
 )}
         

@@ -17,12 +17,6 @@ export default function EditableLabel({ fieldKey, value, onUpdate, defaultLabel,
   };
 
   const getLabel = () => {
-    if (fieldKey === 'organizerEmail') {
-      return formTemplate === 'tpl2' ? 'E-mail' : 'Organizer Email';
-    }
-    if (fieldKey === 'organizerPhone') {
-      return formTemplate === 'tpl2' ? 'Phone No' : 'Organizer Phone';
-    }
     return defaultLabel;
   }
 

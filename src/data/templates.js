@@ -379,11 +379,22 @@ export const TEMPLATE_LIBRARY = [
     formDetails: {
       title: "Book Your Appointment",
       description: "Schedule an appointment at your convenience.",
+      appointmentTitle: "",
+      appointmentType: "",
+      appointmentDateTime: "",
+      appointmentLocation: "",
+      appointmentDescription: "",
     },
     step1VisibleFields: {
-      subtitle: false,
-      logo: false,
-      location: false,
+      subtitle: true,
+      logo: true,
+      headerImage: false,
+      location: true,
+      appointmentTitle: true,
+      appointmentType: true,
+      appointmentDateTime: true,
+      appointmentLocation: true,
+      appointmentDescription: true,
       date: false,
       time: false,
       organizerName: false,
@@ -397,9 +408,11 @@ export const TEMPLATE_LIBRARY = [
     fields: [
       { _id: "ab1", type: "short_text", label: "Name", required: true, placeholder: "Enter your name", order: 0 },
       { _id: "ab2", type: "short_text", label: "Phone", required: true, placeholder: "+1 (555) 123-4567", order: 1 },
-      { _id: "ab3", type: "dropdown", label: "Service Type", required: true, options: ["Consultation", "Follow-up", "Therapy", "Support", "Other"], order: 2 },
-      { _id: "ab4", type: "date", label: "Appointment Date", required: true, placeholder: "Select date", order: 3 },
-      { _id: "ab5", type: "short_text", label: "Time Slot", required: true, placeholder: "e.g., 2:00 PM - 3:00 PM", order: 4 }
+      { _id: "ab_email", type: "email", label: "Email Address", required: true, placeholder: "your.email@example.com", order: 2},
+      { _id: "ab3", type: "dropdown", label: "Service Type", required: true, options: ["Consultation", "Follow-up", "Therapy", "Support", "Other"], order: 3 },
+      { _id: "ab4", type: "date", label: "Appointment Date", required: true, placeholder: "Select date", order: 4 },
+      { _id: "ab5", type: "short_text", label: "Time Slot", required: true, placeholder: "e.g., 2:00 PM - 3:00 PM", order: 5 },
+      { _id: "ab_notes", type: "long_text", label: "Additional Notes", required: false, placeholder: "Any specific requirements or questions?", order: 6 }
     ]
   },
 ];

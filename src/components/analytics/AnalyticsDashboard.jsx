@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   LineChart,
   Line,
@@ -19,6 +19,21 @@ import CompletionRateCard from './CompletionRateCard';
 
 const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
 
+// Custom Tooltip for Charts
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-lg shadow-lg p-3 text-sm">
+        <p className="font-bold text-gray-800">{label}</p>
+        {payload.map((p, i) => (
+          <p key={i} style={{ color: p.color }}>{`${p.name}: ${p.value}`}</p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function AnalyticsDashboard({ formId }) {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,11 +43,7 @@ export default function AnalyticsDashboard({ formId }) {
     endDate: '',
   });
 
-  useEffect(() => {
-    loadAnalytics();
-  }, [formId, dateRange]);
-
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     try {
       setLoading(true);
       const params = {};
@@ -48,7 +59,23 @@ export default function AnalyticsDashboard({ formId }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [formId, dateRange]);
+
+  useEffect(() => {
+    loadAnalytics();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadAnalytics();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [loadAnalytics]);
 
   if (loading) {
     return (
@@ -69,7 +96,7 @@ export default function AnalyticsDashboard({ formId }) {
   if (!analytics) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center text-gray-600">
-        No data available
+        No data available for this form yet. Submit a response to see analytics.
       </div>
     );
   }
@@ -80,7 +107,19 @@ export default function AnalyticsDashboard({ formId }) {
     <div className="space-y-6 pb-8">
       {/* Header with Date Range Filter */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-bold mb-4">Form Analytics</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Form Analytics</h2>
+          <button
+            onClick={loadAnalytics}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md flex items-center gap-2 transition-all duration-300"
+            disabled={loading}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h5M20 20v-5h-5M4 20h5v-5M20 4h-5v5" />
+            </svg>
+            Refresh
+          </button>
+        </div>
         <div className="flex gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -92,7 +131,7 @@ export default function AnalyticsDashboard({ formId }) {
               onChange={(e) =>
                 setDateRange({ ...dateRange, startDate: e.target.value })
               }
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <div>
@@ -105,7 +144,7 @@ export default function AnalyticsDashboard({ formId }) {
               onChange={(e) =>
                 setDateRange({ ...dateRange, endDate: e.target.value })
               }
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <div className="flex items-end">
@@ -160,7 +199,7 @@ export default function AnalyticsDashboard({ formId }) {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
-              <Tooltip />
+              <Tooltip content={<CustomTooltip />} />
               <Legend />
               <Line
                 type="monotone"
@@ -168,6 +207,7 @@ export default function AnalyticsDashboard({ formId }) {
                 stroke="#3b82f6"
                 strokeWidth={2}
                 dot={false}
+                animationDuration={1500}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -214,16 +254,18 @@ function FieldChart({ field }) {
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, value }) => `${name}: ${value}`}
+              label={({ name, value, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
+              animationBegin={200}
+              animationDuration={800}
             >
               {field.chartData.labels.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
           </PieChart>
         </ResponsiveContainer>
       )}
@@ -239,8 +281,8 @@ function FieldChart({ field }) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#3b82f6" />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="value" fill="#3b82f6" animationDuration={1500} />
           </BarChart>
         </ResponsiveContainer>
       )}
