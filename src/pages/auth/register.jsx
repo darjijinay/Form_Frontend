@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { authApi } from '../../api/authApi';
+import { validatePassword, getPasswordHintText } from '../../utils/passwordValidation';
 import { useAuthStore } from '../../store/authStore';
 import logo from '../../assets/logo.png';
 import loginImg from '../../assets/login.jpeg';
@@ -14,12 +15,14 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirm, setShowConfirm] = useState(false);
   const [step, setStep] = useState(1); // 1: register, 2: verify
   const [code, setCode] = useState('');
-  const [timer, setTimer] = useState(300); // 5 minutes in seconds
+  const [timer, setTimer] = useState(60); // 1 minute in seconds
   const [resending, setResending] = useState(false);
   const [emailError, setEmailError] = useState('');
   const timerRef = useRef();
@@ -52,6 +55,13 @@ export default function RegisterPage() {
         setLoading(false);
         return;
       }
+      // Password validations
+      const pwdCheck = validatePassword(password);
+      if (!pwdCheck.isValid) {
+        setError(pwdCheck.errors.join('\n'));
+        setLoading(false);
+        return;
+      }
       if (password !== confirmPassword) {
         setError('Passwords do not match');
         setLoading(false);
@@ -60,7 +70,7 @@ export default function RegisterPage() {
       try {
         await authApi.register({ name, email, password, confirmPassword });
         setStep(2);
-        setTimer(300);
+        setTimer(60);
       } catch (err) {
         setError(err?.response?.data?.message || err?.message || 'Registration failed');
       } finally {
@@ -85,7 +95,7 @@ export default function RegisterPage() {
     setError(null);
     try {
       await authApi.resendCode({ email });
-      setTimer(300);
+      setTimer(60);
     } catch (err) {
       setError(err?.response?.data?.message || err?.message || 'Failed to resend code');
     } finally {
@@ -125,11 +135,38 @@ export default function RegisterPage() {
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-                <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition" type="password" minLength={6} required />
+                <div className="relative">
+                  <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" className="w-full pr-10 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition" type={showPassword ? 'text' : 'password'} minLength={8} required />
+                  <button type="button" aria-label="Toggle password visibility" onClick={() => setShowPassword((s)=>!s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition-transform duration-200">
+                    {showPassword ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9-4.5-10-7 0-.5 1.5-3.5 4.5-5.5m3-1.5A9.4 9.4 0 0112 5c5 0 9 4.5 10 7-.187.468-.742 1.442-1.8 2.55M3 3l18 18M9.9 9.9A3 3 0 0012 9c1.657 0 3 1.343 3 3 0 .76-.284 1.45-.75 1.967" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12zm10-4a4 4 0 100 8 4 4 0 000-8z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-slate-500">{getPasswordHintText()}</p>
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Confirm Password</label>
-                <input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter your password" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition" type="password" minLength={6} required />
+                <div className="relative">
+                  <input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter your password" className="w-full pr-10 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition" type={showConfirm ? 'text' : 'password'} minLength={8} required />
+                  <button type="button" aria-label="Toggle password visibility" onClick={() => setShowConfirm((s)=>!s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition-transform duration-200">
+                    {showConfirm ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9-4.5-10-7 0-.5 1.5-3.5 4.5-5.5m3-1.5A9.4 9.4 0 0112 5c5 0 9 4.5 10 7-.187.468-.742 1.442-1.8 2.55M3 3l18 18M9.9 9.9A3 3 0 0012 9c1.657 0 3 1.343 3 3 0 .76-.284 1.45-.75 1.967" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12zm10-4a4 4 0 100 8 4 4 0 000-8z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
               {error && <p className="text-sm text-red-500 text-center">{error}</p>}
               <button type="submit" className="w-full py-2 mt-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed" disabled={loading}>

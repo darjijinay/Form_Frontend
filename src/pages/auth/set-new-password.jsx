@@ -14,7 +14,9 @@ export default function SetNewPasswordPage() {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [showNew, setShowNew] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -99,28 +101,54 @@ export default function SetNewPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4 text-left">
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">New Password</label>
-              <input 
-                value={newPassword} 
-                onChange={(e) => setNewPassword(e.target.value)} 
-                placeholder="Enter new password" 
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition" 
-                type="password" 
-                required
-              />
+              <div className="relative">
+                <input 
+                  value={newPassword} 
+                  onChange={(e) => setNewPassword(e.target.value)} 
+                  placeholder="Enter new password" 
+                  className="w-full pr-10 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition" 
+                  type={showNew ? 'text' : 'password'} 
+                  required
+                />
+                <button type="button" aria-label="Toggle password visibility" onClick={() => setShowNew((s)=>!s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition-transform duration-200">
+                  {showNew ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9-4.5-10-7 0-.5 1.5-3.5 4.5-5.5m3-1.5A9.4 9.4 0 0112 5c5 0 9 4.5 10 7-.187.468-.742 1.442-1.8 2.55M3 3l18 18M9.9 9.9A3 3 0 0012 9c1.657 0 3 1.343 3 3 0 .76-.284 1.45-.75 1.967" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12zm10-4a4 4 0 100 8 4 4 0 000-8z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
               <p className="text-xs text-slate-500 mt-1">Must include: uppercase, lowercase, number, special character (min 8 chars)</p>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">Confirm Password</label>
-              <input 
-                value={confirmPassword} 
-                onChange={(e) => setConfirmPassword(e.target.value)} 
-                placeholder="Confirm new password" 
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition" 
-                type="password" 
-                required 
-                minLength="6"
-              />
+              <div className="relative">
+                <input 
+                  value={confirmPassword} 
+                  onChange={(e) => setConfirmPassword(e.target.value)} 
+                  placeholder="Confirm new password" 
+                  className="w-full pr-10 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition" 
+                  type={showConfirm ? 'text' : 'password'} 
+                  required 
+                  minLength="8"
+                />
+                <button type="button" aria-label="Toggle password visibility" onClick={() => setShowConfirm((s)=>!s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition-transform duration-200">
+                  {showConfirm ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9-4.5-10-7 0-.5 1.5-3.5 4.5-5.5m3-1.5A9.4 9.4 0 0112 5c5 0 9 4.5 10 7-.187.468-.742 1.442-1.8 2.55M3 3l18 18M9.9 9.9A3 3 0 0012 9c1.657 0 3 1.343 3 3 0 .76-.284 1.45-.75 1.967" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12zm10-4a4 4 0 100 8 4 4 0 000-8z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             {error && (

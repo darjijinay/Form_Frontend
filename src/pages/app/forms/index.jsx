@@ -1,13 +1,15 @@
 "use client";
 import AppLayout from '../../../components/layout/AppLayout';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { formApi } from '../../../api/formApi';
 
 export default function MyFormsPage() {
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedFilter, setSelectedFilter] = useState('all'); // all, day, week, month, year, custom
+  const [customDate, setCustomDate] = useState('');
   const router = useRouter();
 
   const loadForms = () => {
@@ -21,6 +23,50 @@ export default function MyFormsPage() {
   useEffect(() => {
     loadForms();
   }, []);
+
+  // Filter forms based on selected time period
+  const filteredForms = useMemo(() => {
+    if (selectedFilter === 'all') return forms;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    return forms.filter((form) => {
+      const formDate = new Date(form.updatedAt);
+      const formDateOnly = new Date(formDate.getFullYear(), formDate.getMonth(), formDate.getDate());
+
+      switch (selectedFilter) {
+        case 'day':
+          // Today only
+          return formDateOnly.getTime() === today.getTime();
+        
+        case 'week':
+          // Last 7 days
+          const weekAgo = new Date(today);
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          return formDateOnly >= weekAgo && formDateOnly <= today;
+        
+        case 'month':
+          // This month
+          return formDate.getMonth() === now.getMonth() && 
+                 formDate.getFullYear() === now.getFullYear();
+        
+        case 'year':
+          // This year
+          return formDate.getFullYear() === now.getFullYear();
+        
+        case 'custom':
+          // Custom date
+          if (!customDate) return true;
+          const selectedDate = new Date(customDate);
+          const selectedDateOnly = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+          return formDateOnly.getTime() === selectedDateOnly.getTime();
+        
+        default:
+          return true;
+      }
+    });
+  }, [forms, selectedFilter, customDate]);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this form?')) return;
@@ -37,6 +83,15 @@ export default function MyFormsPage() {
       alert(msg);
     }
   };
+
+  const filterOptions = [
+    { value: 'all', label: 'All Forms', icon: '📋' },
+    { value: 'day', label: 'Today', icon: '📅' },
+    { value: 'week', label: 'This Week', icon: '📆' },
+    { value: 'month', label: 'This Month', icon: '📊' },
+    { value: 'year', label: 'This Year', icon: '📈' },
+    { value: 'custom', label: 'Custom Date', icon: '🗓️' },
+  ];
 
   return (
     <AppLayout>
@@ -60,6 +115,42 @@ export default function MyFormsPage() {
             New Form
           </button>
         </div>
+
+        {/* Filter Dropdown */}
+        {!loading && forms.length > 0 && (
+          <div className="pb-6 border-b border-slate-200">
+            <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap">
+              <select
+                value={selectedFilter}
+                onChange={(e) => setSelectedFilter(e.target.value)}
+                className="px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 font-semibold text-sm transition-all duration-200 hover:border-indigo-400 hover:shadow-md focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 cursor-pointer appearance-none bg-no-repeat bg-right pr-8"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234f46e5' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                  backgroundPosition: 'right 0.5rem center',
+                }}
+              >
+                {filterOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              
+              {/* Custom Date Picker */}
+              {selectedFilter === 'custom' && (
+                <input
+                  type="date"
+                  value={customDate}
+                  onChange={(e) => setCustomDate(e.target.value)}
+                  className="px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 font-semibold text-sm transition-all duration-200 hover:border-indigo-400 hover:shadow-md focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 cursor-pointer"
+                />
+              )}
+
+                {/* Results badge removed for all filters */}
+
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
@@ -92,9 +183,27 @@ export default function MyFormsPage() {
               Create Your First Form
             </button>
           </div>
+        ) : filteredForms.length === 0 ? (
+          <div className="bg-white shadow-sm border border-slate-200 p-12 text-center">
+            <div className="h-24 w-24 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-6">
+              <svg className="w-12 h-12 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-slate-700 mb-2">No forms found</h3>
+            <p className="text-slate-600 mb-8">
+              No forms match the selected filter. Try a different time period.
+            </p>
+            <button
+              onClick={() => setSelectedFilter('all')}
+              className="btn-primary btn-accent inline-flex items-center gap-2"
+            >
+              View All Forms
+            </button>
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {forms.map((f) => (
+            {filteredForms.map((f) => (
               <div
                 key={f._id}
                 className="bg-white shadow-sm border border-slate-200 p-6 hover:border-indigo-200 transition-all duration-300 group"

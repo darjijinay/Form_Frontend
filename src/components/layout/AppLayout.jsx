@@ -19,7 +19,7 @@ export default function AppLayout({ children }) {
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col md:flex-row">
       {/* Mobile header with hamburger */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 flex items-center px-4 z-45 gap-3">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 flex items-center px-4 z-[60] gap-3 shadow-sm">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="p-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
@@ -47,7 +47,7 @@ export default function AppLayout({ children }) {
       {/* Sidebar */}
       <aside className={`${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } md:translate-x-0 transition-all duration-300 ease-in-out fixed md:static top-16 md:top-0 left-0 ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'} w-64 border-r border-slate-700 bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col h-[calc(100vh-64px)] md:h-screen z-40 relative`}>
+      } md:translate-x-0 transition-all duration-300 ease-in-out fixed top-16 md:top-0 left-0 ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'} w-64 border-r border-slate-700 bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col h-[calc(100vh-64px)] md:h-screen z-50 md:z-40 md:relative`}>
         <div className="px-4 md:px-6 py-4 md:py-5 border-b border-slate-700 flex-shrink-0 flex items-center justify-between">
           <div className="flex items-center flex-1">
             <div className={`flex items-center justify-center ${sidebarCollapsed ? 'h-10 w-10' : 'h-16 w-16'} text-lg font-bold`}>

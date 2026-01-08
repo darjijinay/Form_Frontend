@@ -62,64 +62,59 @@ export default function PublicFormPage(){
   if(!showForm && !submitted) {
     // ... (logic for info cards, etc. remains the same)
     const usedCustomIndexes = new Set();
-    const findCustomDetail = (matchFn) => {
-      if (!Array.isArray(form.customDetails)) return null;
-      for (let i = 0; i < form.customDetails.length; i++) {
-        const d = form.customDetails[i];
-        if (!d || !d.label) continue;
-        if (matchFn(String(d.label), d.value)) {
-          usedCustomIndexes.add(i);
-          return { value: d.value, label: d.label, index: i };
-        }
-      }
-      return null;
-    };
-
     const initialInfoCards = [];
     const getLabel = (fieldKey, defaultLabel) => form.step1Labels?.[fieldKey] || defaultLabel;
 
-    const dateDetail = form.date ? { value: form.date, label: getLabel('date', 'Date') } : findCustomDetail((label) => /date/i.test(label));
+    // Only add PREDEFINED FORM FIELDS to Details section, never look in custom details
+    const dateDetail = form.date ? { value: form.date, label: getLabel('date', 'Date') } : null;
     if (dateDetail) initialInfoCards.push({ label: dateDetail.label, value: dateDetail.value, icon: '📅' });
 
-    const startDetail = form.startTime ? { value: form.startTime, label: getLabel('startTime', 'Start Time') } : findCustomDetail((label) => /start time|start|begin/i.test(label));
-    const endDetail = form.endTime ? { value: form.endTime, label: getLabel('endTime', 'End Time') } : findCustomDetail((label) => /end time|end|finish|closing/i.test(label));
+    const startDetail = form.startTime ? { value: form.startTime, label: getLabel('startTime', 'Start Time') } : null;
+    const endDetail = form.endTime ? { value: form.endTime, label: getLabel('endTime', 'End Time') } : null;
     if (!startDetail && !endDetail) {
-      const timeDetail = form.time ? { value: form.time, label: getLabel('time', 'Time') } : findCustomDetail((label) => /\btime\b/i.test(label));
+      const timeDetail = form.time ? { value: form.time, label: getLabel('time', 'Time') } : null;
       if (timeDetail) initialInfoCards.push({ label: timeDetail.label, value: timeDetail.value, icon: '⏰' });
     } else {
       if (startDetail) initialInfoCards.push({ label: startDetail.label, value: startDetail.value, icon: '⏰' });
       if (endDetail) initialInfoCards.push({ label: endDetail.label, value: endDetail.value, icon: '⏰' });
     }
 
-    const locationDetail = form.location ? { value: form.location, label: getLabel('location', 'Location / Mode') } : findCustomDetail((label) => /location|place|venue|mode/i.test(label));
+    const locationDetail = form.location ? { value: form.location, label: getLabel('location', 'Location / Mode') } : null;
     if (locationDetail) initialInfoCards.push({ label: locationDetail.label, value: locationDetail.value, icon: '📍' });
 
-    const salaryDetail = form.salary ? { value: form.salary, label: getLabel('salary', 'Salary') } : findCustomDetail((label) => /salary|pay/i.test(label));
+    const salaryDetail = form.salary ? { value: form.salary, label: getLabel('salary', 'Salary') } : null;
     if (salaryDetail) initialInfoCards.push({ label: salaryDetail.label, value: salaryDetail.value, icon: '💰' });
 
-    const employmentTypeDetail = form.employmentType ? { value: form.employmentType, label: getLabel('employmentType', 'Employment Type') } : findCustomDetail((label) => /employment type|job type|employment/i.test(label));
+    const employmentTypeDetail = form.employmentType ? { value: form.employmentType, label: getLabel('employmentType', 'Employment Type') } : null;
     if (employmentTypeDetail) initialInfoCards.push({ label: employmentTypeDetail.label, value: employmentTypeDetail.value, icon: '📄' });
 
-    const skillsDetail = form.skills ? { value: form.skills, label: getLabel('skills', 'Skills') } : findCustomDetail((label) => /skill/i.test(label));
+    const skillsDetail = form.skills ? { value: form.skills, label: getLabel('skills', 'Skills') } : null;
     if (skillsDetail) initialInfoCards.push({ label: skillsDetail.label, value: skillsDetail.value, icon: '✨' });
 
-    const deadlineDetail = form.deadline ? { value: form.deadline, label: getLabel('deadline', 'Application Deadline') } : findCustomDetail((label) => /deadline/i.test(label));
+    const deadlineDetail = form.deadline ? { value: form.deadline, label: getLabel('deadline', 'Application Deadline') } : null;
     if (deadlineDetail) initialInfoCards.push({ label: deadlineDetail.label, value: deadlineDetail.value, icon: '⏳' });
 
-    const organizerNameDetail = form.organizerName ? { value: form.organizerName, label: getLabel('organizerName', 'Organizer') } : findCustomDetail((label) => {
-      const l = String(label).toLowerCase();
-      if (/organizer name|organiser name|organizername|organisername/.test(l)) return true;
-      if (/\borganizer\b|\borganiser\b|\bhost\b|\bby\b/.test(l) && !/email|phone|mobile|contact/.test(l)) return true;
-      return false;
-    });
+    const destinationDetail = form.destination ? { value: form.destination, label: getLabel('destination', 'Destination') } : null;
+    if (destinationDetail) initialInfoCards.push({ label: destinationDetail.label, value: destinationDetail.value, icon: '✈️' });
+
+    const durationDetail = form.duration ? { value: form.duration, label: getLabel('duration', 'Duration') } : null;
+    if (durationDetail) initialInfoCards.push({ label: durationDetail.label, value: durationDetail.value, icon: '⏱️' });
+
+    const priceDetail = form.price ? { value: form.price, label: getLabel('price', 'Price') } : null;
+    if (priceDetail) initialInfoCards.push({ label: priceDetail.label, value: priceDetail.value, icon: '💰' });
+
+    const itineraryDetail = form.itinerary ? { value: form.itinerary, label: getLabel('itinerary', 'Itinerary') } : null;
+    if (itineraryDetail) initialInfoCards.push({ label: itineraryDetail.label, value: itineraryDetail.value, icon: '📋' });
+
+    const organizerNameDetail = form.organizerName ? { value: form.organizerName, label: getLabel('organizerName', 'Organizer') } : null;
     if (organizerNameDetail) initialInfoCards.push({ label: organizerNameDetail.label, value: organizerNameDetail.value, icon: '👤' });
 
     const organizerEmailLabel = form.sourceTemplate === 'tpl2' ? getLabel('organizerEmail', 'E-mail') : getLabel('organizerEmail', 'Organizer Email');
-    const organizerEmailDetail = form.organizerEmail ? { value: form.organizerEmail, label: organizerEmailLabel } : findCustomDetail((label) => /organizer email|organizeremail|contact email|email|e-mail/i.test(String(label).toLowerCase()));
+    const organizerEmailDetail = form.organizerEmail ? { value: form.organizerEmail, label: organizerEmailLabel } : null;
     if (organizerEmailDetail) initialInfoCards.push({ label: organizerEmailDetail.label || organizerEmailLabel, value: organizerEmailDetail.value, icon: '✉️' });
 
     const organizerPhoneLabel = form.sourceTemplate === 'tpl2' ? getLabel('organizerPhone', 'Phone No') : getLabel('organizerPhone', 'Phone');
-    const organizerPhoneDetail = form.organizerPhone ? { value: form.organizerPhone, label: organizerPhoneLabel } : findCustomDetail((label) => /organizer phone|phone|mobile|contact phone|phone number|tel|telephone/i.test(String(label).toLowerCase()));
+    const organizerPhoneDetail = form.organizerPhone ? { value: form.organizerPhone, label: organizerPhoneLabel } : null;
     if (organizerPhoneDetail) initialInfoCards.push({ label: organizerPhoneDetail.label || organizerPhoneLabel, value: organizerPhoneDetail.value, icon: '📞' });
 
     const destinationDetail = form.destination ? { value: form.destination, label: getLabel('destination', 'Destination') } : findCustomDetail((label) => /destination/i.test(label));
@@ -243,35 +238,121 @@ export default function PublicFormPage(){
                 </div>
               )}
   
-              {/* Info Cards */}
+              {/* Info Cards - only standard fields */}
               {infoCards.length > 0 && (
-                <div className="mb-8">
-                   <h2 className="text-xl font-bold text-slate-700 mb-4">Details</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {infoCards.map((card, idx) => (
-                      <div key={idx} className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-5 flex items-start gap-4">
-                        <div className="h-12 w-12 rounded-lg bg-indigo-100 flex items-center justify-center text-2xl text-indigo-500 flex-shrink-0">
-                          {card.icon}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-slate-500">{card.label}</p>
-                          <p className="text-base font-bold text-slate-800 break-words">{card.value}</p>
-                        </div>
+                <div className="mb-12">
+                   <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4 sm:mb-6">Details</h2>
+                  <div className="space-y-2 sm:space-y-3 overflow-x-auto">
+                    <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 min-w-full`}>
+                      {infoCards.map((card, idx) => {
+                        const isLastAndOdd = idx === infoCards.length - 1 && infoCards.length % 2 === 1;
+                        const isMultiLine = card.value && card.value.includes('\n');
+                        if (isLastAndOdd) return null;
+                        
+                        // Multi-line or itinerary: vertical layout
+                        if (isMultiLine || card.label.toLowerCase().includes('itinerary')) {
+                          return (
+                            <div 
+                              key={idx} 
+                              className="bg-white border border-slate-200 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200"
+                            >
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="h-7 w-7 sm:h-8 sm:w-8 rounded bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center text-sm sm:text-base flex-shrink-0">
+                                  {card.icon}
+                                </div>
+                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{card.label}</p>
+                              </div>
+                              <div className="text-xs sm:text-sm font-semibold text-slate-900 whitespace-pre-wrap leading-relaxed">
+                                {card.value}
+                              </div>
+                            </div>
+                          );
+                        }
+                        
+                        // Single-line: horizontal layout
+                        return (
+                          <div 
+                            key={idx} 
+                            className="bg-white border border-slate-200 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 flex items-center justify-between"
+                          >
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <div className="h-7 w-7 sm:h-8 sm:w-8 rounded bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center text-sm sm:text-base flex-shrink-0">
+                                {card.icon}
+                              </div>
+                              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{card.label}</p>
+                            </div>
+                            <div className="flex-shrink-0 ml-2">
+                              <p className="text-xs sm:text-sm font-semibold text-slate-900 text-right whitespace-nowrap">
+                                {card.value}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {infoCards.length % 2 === 1 && (
+                      <div className="flex justify-center">
+                        {infoCards.map((card, idx) => {
+                          const isLastAndOdd = idx === infoCards.length - 1 && infoCards.length % 2 === 1;
+                          const isMultiLine = card.value && card.value.includes('\n');
+                          if (!isLastAndOdd) return null;
+                          
+                          // Multi-line or itinerary: vertical layout
+                          if (isMultiLine || card.label.toLowerCase().includes('itinerary')) {
+                            return (
+                              <div 
+                                key={idx} 
+                                className="w-full sm:w-1/2 bg-white border border-slate-200 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200"
+                              >
+                                <div className="flex items-center gap-2 mb-3">
+                                  <div className="h-7 w-7 sm:h-8 sm:w-8 rounded bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center text-sm sm:text-base flex-shrink-0">
+                                    {card.icon}
+                                  </div>
+                                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{card.label}</p>
+                                </div>
+                                <div className="text-xs sm:text-sm font-semibold text-slate-900 whitespace-pre-wrap leading-relaxed">
+                                  {card.value}
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          // Single-line: horizontal layout
+                          return (
+                            <div 
+                              key={idx} 
+                              className="w-full sm:w-1/2 bg-white border border-slate-200 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 flex items-center justify-between"
+                            >
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <div className="h-7 w-7 sm:h-8 sm:w-8 rounded bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center text-sm sm:text-base flex-shrink-0">
+                                  {card.icon}
+                                </div>
+                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{card.label}</p>
+                              </div>
+                              <div className="flex-shrink-0 ml-2">
+                                <p className="text-xs sm:text-sm font-semibold text-slate-900 text-right whitespace-nowrap">
+                                  {card.value}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               )}
   
-              {/* Remaining Custom Details */}
-              {remainingCustomDetails.length > 0 && (
+              
+              {/* All Custom Details in Key Information */}
+              {Array.isArray(form.customDetails) && form.customDetails.length > 0 && (
                  <div className="mb-8">
                     <h2 className="text-xl font-bold text-slate-700 mb-4">Key Information</h2>
                     <div className="border border-slate-200 rounded-xl">
                       {remainingCustomDetails.map((detail, idx) => (
                         <div key={idx} className={`flex items-center justify-between p-4 ${idx > 0 ? 'border-t border-slate-200' : ''}`}>
-                          <span className="font-semibold text-slate-600">{detail.label || 'Detail'}</span>
-                          <span className="text-slate-500 text-right whitespace-pre-wrap">{detail.value || '—'}</span>
+                          <span className="font-semibold text-slate-600">{detail?.label || 'Detail'}</span>
+                          <span className="text-slate-500 text-right whitespace-pre-wrap">{detail?.value || '—'}</span>
                         </div>
                       ))}
                     </div>
@@ -375,6 +456,18 @@ export default function PublicFormPage(){
                 </div>
               </div>
             )}
+            
+            {(form.settings?.collectEmails === 'responder_input' || form.fields?.some(f => f.type === 'email')) && sendCopyMode === 'always' && (
+              <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <span className="text-blue-600 text-lg">ℹ️</span>
+                  <p className="text-sm text-blue-800">
+                    A copy of your responses will be emailed to the address you provided.
+                  </p>
+                </div>
+              </div>
+            )}
+            
             <FormRenderer key={formInstanceKey} form={form} onSubmit={handleSubmit} />
           </div>
         )}

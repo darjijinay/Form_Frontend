@@ -58,11 +58,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <div className="flex items-center ">
-              <div className="flex items-center justify-center">
-                <Image src={logo} alt="FormCraft Logo" width={48} height={48} className="drop-shadow-sm" />
+            <div className="flex items-center">
+              <div className="relative w-9 h-9 sm:w-12 sm:h-12 mr-2 sm:mr-3">
+                <Image src={logo} alt="FormCraft Logo" fill sizes="(max-width: 640px) 36px, 48px" className="object-contain drop-shadow-sm" priority />
               </div>
-              <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">FormCraft</span>
+              <span className="text-lg sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">FormCraft</span>
             </div>
 
             {/* Center Navigation */}
@@ -82,11 +82,11 @@ export default function Home() {
             </nav>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-4">
-              <Link href="/auth/login" className="px-5 py-2.5 text-[15px] font-medium text-slate-700 hover:text-indigo-600 transition-colors">
+            <div className="flex items-center gap-2 sm:gap-4 ml-2">
+              <Link href="/auth/login" className="inline-flex items-center justify-center h-9 sm:h-10 px-3 sm:px-5 rounded-lg border border-slate-300 text-xs sm:text-[15px] font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-colors whitespace-nowrap">
                 Sign In
               </Link>
-              <Link href="/auth/register" className="px-6 py-3 text-[15px] font-semibold rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 transition-all transform hover:scale-105">
+              <Link href="/auth/register" className="inline-flex items-center justify-center h-9 sm:h-10 px-3 sm:px-6 text-xs sm:text-[15px] font-semibold rounded-lg sm:rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md sm:shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 transition-all sm:transform sm:hover:scale-105 whitespace-nowrap">
                 Get Started
               </Link>
             </div>
@@ -107,9 +107,9 @@ export default function Home() {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 pb-40 sm:pb-56">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-20 pb-28 sm:pb-56">
           <div className="text-center">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-4 sm:mb-6 leading-tight">
               <span className="bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                 Build Powerful Forms
               </span>
@@ -118,15 +118,15 @@ export default function Home() {
                 Without Code
               </span>
             </h1>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-10">
+            <p className="text-base sm:text-xl text-slate-600 max-w-2xl sm:max-w-3xl mx-auto mb-8 sm:mb-10">
               Build, customize, and share dynamic forms with our intuitive drag-and-drop builder. 
               Collect responses, analyze data, and streamline your workflow.
             </p>
-            <div className="flex items-center justify-center gap-4">
-              <Link href="/auth/register" className="px-8 py-4 text-lg font-medium rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all">
+            <div className="flex items-center justify-center gap-3 sm:gap-4 flex-col sm:flex-row w-full max-w-md sm:max-w-none mx-auto">
+              <Link href="/auth/register" className="w-full sm:w-auto px-4 py-2 sm:px-8 sm:py-4 text-sm sm:text-lg font-medium rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all whitespace-nowrap">
                 Start Building Free
               </Link>
-              <a href="#features" className="px-8 py-4 text-lg font-medium rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all">
+              <a href="#features" className="w-full sm:w-auto px-4 py-2 sm:px-8 sm:py-4 text-sm sm:text-lg font-medium rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all whitespace-nowrap text-center">
                 Learn More
               </a>
             </div>
@@ -249,8 +249,8 @@ export default function Home() {
                     <p className="text-sm text-slate-600 leading-relaxed flex-1">{t.description}</p>
                   </div>
 
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-slate-900/30 to-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-md rounded-2xl">
+                  {/* Overlay (desktop / tablet) */}
+                  <div className="hidden md:flex absolute inset-0 bg-gradient-to-br from-slate-900/40 via-slate-900/30 to-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center backdrop-blur-md rounded-2xl">
                     <div className="flex gap-3 flex-wrap justify-center px-4">
                       <button
                         onClick={() => setSelectedTemplate(t)}
@@ -274,6 +274,25 @@ export default function Home() {
                       </button>
                     </div>
                   </div>
+
+                  {/* Mobile actions (always visible) */}
+                  <div className="md:hidden px-4 pb-4">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setSelectedTemplate(t)}
+                        className="flex-1 bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+                      >
+                        Preview
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleUseTemplate(t); }}
+                        disabled={creatingFromTemplate}
+                        className="flex-1 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+                      >
+                        Use Template
+                      </button>
+                    </div>
+                  </div>
                 </div>
               );
             })}
@@ -291,23 +310,23 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24">
-        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl p-12 text-center text-white">
-            <p className="text-sm font-medium text-purple-100 mb-3">Join thousands of users creating forms with FormCraft</p>
-            <h2 className="text-4xl font-bold mb-8">Ready to Build Your First Form?</h2>
-            <p className="text-lg text-purple-100 mb-10 leading-relaxed">
+      <section className="py-16 sm:py-24">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-12">
+          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl p-6 sm:p-12 text-center text-white">
+            <p className="text-xs sm:text-sm font-medium text-purple-100 mb-2 sm:mb-3">Join thousands of users creating forms with FormCraft</p>
+            <h2 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-8">Ready to Build Your First Form?</h2>
+            <p className="text-sm sm:text-lg text-purple-100 mb-6 sm:mb-10 leading-relaxed">
               Join thousands of users creating beautiful forms. Start with FormCraft today.
             </p>
-            <div className="flex items-center justify-center gap-4 mb-8 flex-wrap">
-              <Link href="/auth/register" className="px-8 py-3 text-lg font-medium rounded-lg bg-white text-purple-600 hover:bg-gray-100 transition-all">
+            <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8 flex-wrap w-full max-w-md sm:max-w-none mx-auto">
+              <Link href="/auth/register" className="w-full sm:w-auto px-6 sm:px-8 py-3 text-base sm:text-lg font-medium rounded-lg bg-white text-purple-600 hover:bg-gray-100 transition-all text-center">
                 Get Started for Free
               </Link>
-              <button className="px-8 py-3 text-lg font-medium rounded-lg border-2 border-white/50 text-white hover:border-white transition-all">
+              <button className="w-full sm:w-auto px-6 sm:px-8 py-3 text-base sm:text-lg font-medium rounded-lg border-2 border-white/50 text-white hover:border-white transition-all">
                 Contact Sales
               </button>
             </div>
-            <div className="flex items-center justify-center gap-6 text-sm text-purple-100 flex-wrap">
+            <div className="flex items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-purple-100 flex-wrap">
               <div className="flex items-center gap-2">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                 No credit card required

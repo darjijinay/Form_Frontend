@@ -511,7 +511,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
               ) : newDetail.type === 'Time' ? (
                 <input type="time" value={newDetail.value} onChange={(e) => setNewDetail({ ...newDetail, value: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer" style={{ colorScheme: 'light' }} />
               ) : (
-                <input type={newDetail.type === 'Email' ? 'email' : newDetail.type === 'Number' ? 'number' : 'text'} value={newDetail.value} onChange={(e) => setNewDetail({ ...newDetail, value: e.target.value })} placeholder={newDetail.type === 'Email' ? 'e.g., organizer@example.com' : newDetail.type === 'Number' ? 'e.g., 100, 50, 2, etc.' : 'e.g., Speaker lineup, 2 hours, Online, etc.'} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input type={newDetail.type === 'Email' ? 'email' : newDetail.type === 'Number' ? 'number' : 'text'} value={newDetail.value} onChange={(e) => setNewDetail({ ...newDetail, value: e.target.value })} placeholder={newDetail.type === 'Email' ? 'e.g., organizer@example.com' : newDetail.type === 'Number' ? 'e.g., +1 (555) 123-4567' : 'e.g., Speaker lineup, 2 hours, Online, etc.'} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-inner-spin-button]:m-0" />
               )}
             </div>
           </div>

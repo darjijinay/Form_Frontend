@@ -53,7 +53,6 @@ export default function AnalyticsPage() {
 
   const totalResponses = overview?.totalResponses || 0;
   const activeForms = overview?.activeForms || 0;
-  const totalForms = overview?.totalForms || 0;
   const totalViews = overview?.totalViews || 0;
 
   // daily data (last 30 days)
@@ -133,11 +132,10 @@ export default function AnalyticsPage() {
           <p className="text-slate-600">Aggregate performance metrics across all your forms.</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-3">
           <Stat label="Total Responses" value={totalResponses} />
           <Stat label="Total Views" value={totalViews} />
           <Stat label="Active Forms" value={activeForms} />
-          <Stat label="Total Forms" value={totalForms} />
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">

@@ -10,6 +10,7 @@ export default function ResetPasswordPage() {
   const router = useRouter();
   const { email: queryEmail } = router.query;
   const codeSentRef = useRef(false);
+  const timerRef = useRef();
   
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -17,6 +18,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState(null);
   const [sendingCode, setSendingCode] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
+  const [timer, setTimer] = useState(0); // seconds countdown for resend
 
   useEffect(() => {
     if (queryEmail && !codeSentRef.current) {
@@ -28,8 +30,16 @@ export default function ResetPasswordPage() {
     }
   }, [queryEmail]);
 
+  // Countdown effect for resend timer (1 minute)
+  useEffect(() => {
+    if (!codeSent) return; // only run when a code has been sent
+    if (timer <= 0) return;
+    timerRef.current = setTimeout(() => setTimer((t) => t - 1), 1000);
+    return () => clearTimeout(timerRef.current);
+  }, [timer, codeSent]);
+
   const sendVerificationCode = async (emailToSend) => {
-    if (!emailToSend || codeSent) return;
+    if (!emailToSend) return;
     
     setSendingCode(true);
     setError(null);
@@ -37,6 +47,7 @@ export default function ResetPasswordPage() {
     try {
       await authApi.forgotPassword({ email: emailToSend });
       setCodeSent(true);
+      setTimer(60); // start 1-minute countdown
     } catch (err) {
       setError(err?.response?.data?.message || err?.message || 'Failed to send verification code');
     } finally {
@@ -127,14 +138,20 @@ export default function ResetPasswordPage() {
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-xs font-semibold text-slate-600">Verification Code</label>
                 {codeSent && (
-                  <button
-                    type="button"
-                    onClick={handleResendCode}
-                    disabled={sendingCode}
-                    className="text-xs text-indigo-600 hover:text-indigo-700 hover:underline font-medium disabled:opacity-50"
-                  >
-                    Resend code
-                  </button>
+                  timer > 0 ? (
+                    <span className="text-xs text-slate-500">
+                      Code expire in {Math.floor(timer/60)}:{(timer%60).toString().padStart(2,'0')}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResendCode}
+                      disabled={sendingCode}
+                      className="text-xs text-indigo-600 hover:text-indigo-700 hover:underline font-medium disabled:opacity-50"
+                    >
+                      Resend code
+                    </button>
+                  )
                 )}
               </div>
               <input 
