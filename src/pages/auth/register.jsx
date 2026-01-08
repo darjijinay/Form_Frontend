@@ -47,7 +47,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
     if (step === 1) {
-      if (!emailRegex.test(email)) {
+      if (emailError || !emailRegex.test(email)) {
         setError('Please enter a valid email address');
         setLoading(false);
         return;

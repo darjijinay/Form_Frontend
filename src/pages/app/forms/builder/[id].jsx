@@ -41,6 +41,7 @@ function QrImage({ publicUrl }) {
 import { formApi } from '../../../../api/formApi';
 import { useAuthStore } from '../../../../store/authStore';
 import { TEMPLATE_LIBRARY } from '../../../../data/templates';
+import { emailRegex } from '../../../../utils/validateField';
 
 export default function FormBuilderPage() {
   const router = useRouter();
@@ -53,6 +54,7 @@ export default function FormBuilderPage() {
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState({});
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [notificationEmailError, setNotificationEmailError] = useState(null);
   const statusTimer = useRef(null);
   const isMounted = useRef(false);
 
@@ -184,6 +186,16 @@ export default function FormBuilderPage() {
       if (statusTimer.current) clearTimeout(statusTimer.current);
     };
   }, []);
+
+  const handleNotificationEmailChange = (e) => {
+    const newEmail = e.target.value;
+    setForm(prev => ({...prev, settings: {...prev.settings, notificationEmail: newEmail}}));
+    if (newEmail && !emailRegex.test(newEmail)) {
+        setNotificationEmailError('Please enter a valid email address');
+    } else {
+        setNotificationEmailError(null);
+    }
+  }
 
   if (!form || !step1VisibleFields) {
     return (

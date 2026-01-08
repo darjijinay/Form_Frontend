@@ -6,6 +6,7 @@ import { authApi } from '../../api/authApi';
 import { useAuthStore } from '../../store/authStore';
 import logo from '../../assets/logo.png';
 import loginImg from '../../assets/login.jpeg';
+import { emailRegex } from '../../utils/validateField';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,8 +15,19 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [emailError, setEmailError] = useState(null);
   const [step, setStep] = useState(1); // 1: login, 2: code
   const [code, setCode] = useState('');
+
+  const handleEmailChange = (e) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    if (newEmail && !emailRegex.test(newEmail)) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setEmailError(null);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,6 +35,11 @@ export default function LoginPage() {
     setError(null);
     try {
       if (step === 1) {
+        if (emailError || !emailRegex.test(email)) {
+            setError('Please enter a valid email address');
+            setLoading(false);
+            return;
+        }
         const res = await authApi.login({ email, password });
         const { user, token, message } = res.data || {};
         if (token) {
@@ -77,7 +94,8 @@ export default function LoginPage() {
               <>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Email Address</label>
-                  <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition" type="email" required />
+                  <input value={email} onChange={handleEmailChange} placeholder="you@example.com" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition" type="email" required />
+                  {emailError && <p className="text-sm text-red-500 mt-1">{emailError}</p>}
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Password</label>

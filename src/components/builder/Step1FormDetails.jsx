@@ -1,5 +1,6 @@
 import EditableLabel from './EditableLabel';
 import { useState } from 'react';
+import { emailRegex } from '../../utils/validateField';
 
 const fieldCategories = {
   'Basic': ['subtitle', 'logo', 'headerImage', 'location'],
@@ -120,12 +121,20 @@ const AddFieldDropdown = ({ onAddField, availableFields, formTemplate }) => {
 export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisibleFieldsChange, formTemplate }) {
   const fieldTypeOptions = ['Short Text', 'Email', 'Number', 'Long Text', 'Date', 'Time'];
   const [newDetail, setNewDetail] = useState({ label: '', value: '', type: 'Short Text' });
+  const [organizerEmailError, setOrganizerEmailError] = useState(null);
   const [isDateFocused, setDateFocused] = useState(false);
   const [isTimeFocused, setTimeFocused] = useState(false);
   const [isDeadlineFocused, setDeadlineFocused] = useState(false);
 
   const handleInputChange = (field, value) => {
     onUpdate({ ...form, [field]: value });
+     if (field === 'organizerEmail') {
+        if (value && !emailRegex.test(value)) {
+            setOrganizerEmailError('Please enter a valid email address');
+        } else {
+            setOrganizerEmailError(null);
+        }
+    }
   };
 
   const handleLabelUpdate = (field, newLabel) => {
@@ -328,6 +337,7 @@ export default function Step1FormDetails({ form, onUpdate, visibleFields, onVisi
                 <button onClick={() => removeField('organizerEmail')} className="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
               <input type="email" value={form.organizerEmail || ''} onChange={(e) => handleInputChange('organizerEmail', e.target.value)} placeholder="e.g., event.organizer@example.com" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              {organizerEmailError && <p className="text-sm text-red-500 mt-1">{organizerEmailError}</p>}
             </div>
           )}
         </div>
