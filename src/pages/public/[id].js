@@ -65,6 +65,22 @@ export default function PublicFormPage(){
     const initialInfoCards = [];
     const getLabel = (fieldKey, defaultLabel) => form.step1Labels?.[fieldKey] || defaultLabel;
 
+    const findCustomDetail = (predicate) => {
+        if (!Array.isArray(form.customDetails)) {
+            return null;
+        }
+        const detail = form.customDetails.find(d => d && predicate(d.label));
+        if (!detail) {
+            return null;
+        }
+        // Mark as used
+        const detailIndex = form.customDetails.findIndex(d => d && predicate(d.label));
+        if (detailIndex !== -1) {
+            usedCustomIndexes.add(detailIndex);
+        }
+        return detail;
+    };
+
     // Only add PREDEFINED FORM FIELDS to Details section, never look in custom details
     const dateDetail = form.date ? { value: form.date, label: getLabel('date', 'Date') } : null;
     if (dateDetail) initialInfoCards.push({ label: dateDetail.label, value: dateDetail.value, icon: '📅' });
@@ -93,15 +109,6 @@ export default function PublicFormPage(){
 
     const deadlineDetail = form.deadline ? { value: form.deadline, label: getLabel('deadline', 'Application Deadline') } : null;
     if (deadlineDetail) initialInfoCards.push({ label: deadlineDetail.label, value: deadlineDetail.value, icon: '⏳' });
-
-    const destinationDetail = form.destination ? { value: form.destination, label: getLabel('destination', 'Destination') } : null;
-    if (destinationDetail) initialInfoCards.push({ label: destinationDetail.label, value: destinationDetail.value, icon: '✈️' });
-
-    const durationDetail = form.duration ? { value: form.duration, label: getLabel('duration', 'Duration') } : null;
-    if (durationDetail) initialInfoCards.push({ label: durationDetail.label, value: durationDetail.value, icon: '⏱️' });
-
-    const priceDetail = form.price ? { value: form.price, label: getLabel('price', 'Price') } : null;
-    if (priceDetail) initialInfoCards.push({ label: priceDetail.label, value: priceDetail.value, icon: '💰' });
 
     const itineraryDetail = form.itinerary ? { value: form.itinerary, label: getLabel('itinerary', 'Itinerary') } : null;
     if (itineraryDetail) initialInfoCards.push({ label: itineraryDetail.label, value: itineraryDetail.value, icon: '📋' });
